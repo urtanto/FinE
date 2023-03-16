@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% load bootstrap5 %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pagename }} - Simple votings</title>
+
+    {% bootstrap_css %}
+    {% block extra_css %}{% endblock %}
+</head>
+
+
+<body>
+
+<header>
+    {% include 'base/menu.html' %}
+</header>
+
+<main role="main" class="container">
+    {% bootstrap_messages %}
+    {% block content %} {% endblock %}
+</main>
+
+{% block extracontent %} {% endblock %}
+
+<footer class="footer">
+    {% block footer %}
+    <div class="container text-right">
+        <span class="text-muted">&copy; ШП, {% now "Y" %}</span>
+    </div>
+    {% endblock %}
+</footer>
+
+{% block extra_js %}
+{% endblock %}
+</body>
+</html>
