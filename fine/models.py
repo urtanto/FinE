@@ -12,6 +12,7 @@ class EntertainmentType(models.IntegerChoices):
 
 class User(AbstractUser):
     status = models.CharField(max_length=255)
+    phone_number = models.CharField(null=True, max_length=20)
 
 
 class UserSettings(models.Model):
@@ -32,7 +33,17 @@ class Event(models.Model):
     finish_day = models.DateTimeField()
     description = models.CharField(max_length=255)
     entertainment_type = models.IntegerField(choices=EntertainmentType.choices)
-    author_id = models.ForeignKey(get_user_model(), models.CASCADE)
+    author = models.ForeignKey(get_user_model(), models.CASCADE)
+
+
+class Interests(models.Model):
+    interest = models.IntegerField(choices=EntertainmentType.choices)
+    user = models.ForeignKey(get_user_model(), models.CASCADE)
+
+
+class RegistrationEvents(models.Model):
+    event = models.ForeignKey(Event, models.CASCADE)
+    user = models.ForeignKey(get_user_model(), models.CASCADE)
 
 
 class Report(models.Model):
