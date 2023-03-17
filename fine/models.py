@@ -11,6 +11,11 @@ class EntertainmentType(models.IntegerChoices):
 
 
 class User(AbstractUser):
+    """
+    Класс пользователя
+
+    :param status: если честно хз :class:`django.contrib.auth.models.AbstractUser`
+    """
     status = models.CharField(max_length=255)
     phone_number = models.CharField(null=True, max_length=20)
 
