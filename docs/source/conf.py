@@ -13,6 +13,7 @@ sys.path.append(os.path.abspath('../../'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangoProject.settings')
 
 import django
+
 django.setup()
 
 project = 'FinE'
@@ -25,6 +26,7 @@ release = 'v0.0'
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
 ]
 
 templates_path = ['_templates']
@@ -37,3 +39,9 @@ language = 'ru'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+intersphinx_mapping = {
+    'django': (
+        'http://docs.djangoproject.com/en/dev/',
+        'http://docs.djangoproject.com/en/dev/_objects/',
+    )
+}
