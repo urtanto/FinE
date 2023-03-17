@@ -24,17 +24,27 @@
    Далее полученное значение подставляется в соответствующую переменную.
    Внимание! Без выполнения этого пункта никакие команды далее не запустятся.
 
-7. Синхронизировать структуру базы данных с моделями: 
+8. Синхронизировать структуру базы данных с моделями: 
    ```bash
    python manage.py migrate
-   ```
-
-8. Создать суперпользователя
-   ```bash
-   python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('vasya', '1@abc.net', 'promprog')"
    ```
 
 9. Создать конфигурацию запуска в PyCharm (файл `manage.py`, опция `runserver`)
 
 Внимание! Создана отдельная модель пользователя в модуле `fine`! 
-При создании ForeignKey'ев на User'а - использовать её при помощи встроенной функции `get_user_model`.
+При создании ForeignKey'ев на User'а - использовать её при помощи встроенной функции `get_user_model`. 
+
+* Создать суперпользователя:
+   ```bash
+   python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('vasya', '1@abc.net', 'promprog')"
+   ```
+  
+* Накатить миграции: 
+   ```bash
+   python manage.py makemigrations
+   ```
+  
+* Накатить миграции: 
+   ```bash
+   python manage.py migrate
+   ```

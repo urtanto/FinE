@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@9b_x4t*d+ck!d9zgo%fr^-(l$!)6-@bnka(&#ex83%xpc!g6s'
+SECRET_KEY = 'Insert secret key here and uncomment this variable'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -137,4 +137,4 @@ AUTH_USER_MODEL = 'fine.User'
 
 # Checking those who are too lazy to indicate the correct SECRET_KEY
 if SECRET_KEY == 'Insert secret key here and uncomment this variable':
-    raise RuntimeError('Сначала укажите SECRET_KEY. Подробности - в settings.py')
+    raise RuntimeError('Сначала укажите SECRET_KEY. Подробности - в README.md')
