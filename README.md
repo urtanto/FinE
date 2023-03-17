@@ -34,6 +34,15 @@
 Внимание! Создана отдельная модель пользователя в модуле `fine`! 
 При создании ForeignKey'ев на User'а - использовать её при помощи встроенной функции `get_user_model`. 
 
+* Создать документацию *(Windows)*:
+   ```bash
+   .\docs\make html
+   ```
+* Создать документацию *(Linux <- это кстати не точно)*:
+   ```bash
+   \docs\make html
+   ```
+
 * Создать суперпользователя:
    ```bash
    python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('vasya', '1@abc.net', 'promprog')"
