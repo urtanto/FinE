@@ -15,3 +15,4 @@ def index_page(request: WSGIRequest):
         'menu': get_menu_context()
     }
     return render(request, 'pages/index.html', context)
+ 
