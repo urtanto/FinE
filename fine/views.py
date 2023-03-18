@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 def get_menu_context():
     """
-    Возвращает контекст меню
+    Функция для возвращения контекста меню
 
     :return: контекст меню
     """
