@@ -3,6 +3,11 @@ from django.shortcuts import render
 
 
 def get_menu_context():
+    """
+    Возвращает контекст меню
+
+    :return: контекст меню
+    """
     return [
         {'url_name': 'index', 'name': 'Меню'},
         {'url_name': 'index', 'name': 'Мои голосования'},
