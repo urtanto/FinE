@@ -1,8 +1,14 @@
+# pylint: disable=C0114
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import render
 
 
 def get_menu_context():
+    """
+    Функция для возвращения контекста меню
+
+    :return: контекст меню
+    """
     return [
         {'url_name': 'index', 'name': 'Меню'},
         {'url_name': 'index', 'name': 'Мои голосования'},
@@ -10,6 +16,9 @@ def get_menu_context():
 
 
 def index_page(request: WSGIRequest):
+    """
+    Функция обрабатывающая запрос /
+    """
     context = {
         'pagename': 'Simple voting',
         'menu': get_menu_context()
