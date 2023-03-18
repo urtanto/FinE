@@ -1,4 +1,5 @@
-from django.core.handlers.wsgi import WSGIRequest  # pylint: disable=C0114
+# pylint: disable=C0114
+from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import render
 
 
