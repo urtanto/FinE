@@ -16,9 +16,6 @@ def get_menu_context():
 
 
 def index_page(request: WSGIRequest):
-    """
-    Функция обрабатывающая запрос /
-    """
     context = {
         'pagename': 'Simple voting',
         'menu': get_menu_context()
