@@ -26,12 +26,19 @@ def index_page(request: WSGIRequest):
         'pagename': 'Simple voting',
         'menu': get_menu_context()
     }
-    return render(request, 'pages/index.html', context)
+    return render(request, 'pages/start/index.html', context)
 
-def cheack_for_none(id, model):
+
+def cheack_for_none(user_id, model):
+    """
+    Надо
+
+    :param user_id:
+    :param model:
+    :return:
+    """
     try:
-        temp = model.objects.get(user=id)
-
+        temp = model.objects.get(user=user_id)
         return temp
     except model.DoesNotExist:
         return None
@@ -42,11 +49,11 @@ def profile_view_page(request: WSGIRequest, code: int):
     Профиль пользователя
     """
     context = {'pagename': 'Profile',
-               'menu': get_menu_context() }
+               'menu': get_menu_context()}
     try:
-        context['user'] = User.objects.get(id=code) # все поля из модели для пользователя с id = code
-        context['events'] = cheack_for_none(code, RegistrationEvents) # ивенты, на которые зарегался пользователь
-        context['interests'] = cheack_for_none(code, Interests) # интересы пользователя
+        context['user'] = User.objects.get(user_id=code)  # все поля из модели для пользователя с id = code
+        context['events'] = cheack_for_none(code, RegistrationEvents)  # ивенты, на которые зарегался пользователь
+        context['interests'] = cheack_for_none(code, Interests)  # интересы пользователя
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
