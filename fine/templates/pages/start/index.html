@@ -2,9 +2,14 @@
 
 
 {% block content %}
-    <div class="row mt-3">
-        <div class="col">
-            <h1>Wellcome!</h1>
-        </div>
+<div class="row mt-3">
+    <div class="col">
+        <h1>Wellcome!</h1>
     </div>
+</div>
+<a href="{% url 'login' %}">Войти</a>
+<p></p>
+<a href="{% url 'register' %}">Зарегистрироваться</a>
+<p></p>
+<a href="{% url 'logout' %}">Выйти</a>
 {% endblock %}

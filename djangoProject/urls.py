@@ -16,14 +16,26 @@ Including another URLconf
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
 
 from djangoProject import settings
 from fine import views
+from fine.views import get_menu_context
 
 urlpatterns = [
     path('', views.index_page, name='index'),
     path('admin/', admin.site.urls),
-    path('profile/<int:code>', views.profile_view_page, name='profile')
+    path('profile/<int:code>', views.profile_view_page, name='profile'),
+    path('login/',
+         auth_views.LoginView.as_view(
+             extra_context={
+                 'menu': get_menu_context(),
+                 'pagename': 'Авторизация'
+             }
+         ),
+         name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('registration/', views.registration_page, name='register'),
 ]
 
 if settings.DEBUG:
