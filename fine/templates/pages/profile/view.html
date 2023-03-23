@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+    <br><br><br>
+    <h3>Ваш профиль</h3>
+
+    <p>Имя пользователя:{{user.username}}</p>
+    <p>Почта:{{user.email}}</p>
+    <p>Имя:{{user.first_name}}</p>
+    <p>Фамилия:{{user.last_name}}</p>
+    <p>Последний вход: {{user.last_login}}</p>
+    {% if user.avatar %}
+        <img src="{%default_avatar.png.url}">
+    {% endif %}
+    {% if not user.avatar %}
+        <img src="{%static 'images/default_avatar.png' %}">
+    {% endif %}
+    Пользователь с {{user.date_joined.date}}
+{% endblock %}

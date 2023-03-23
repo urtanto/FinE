@@ -18,6 +18,7 @@ class User(AbstractUser):
     """
     status = models.CharField(max_length=255)
     phone_number = models.CharField(null=True, max_length=20)
+    avatar = models.ImageField(upload_to='images/', blank=True, null=True)
 
 
 class UserSettings(models.Model):
