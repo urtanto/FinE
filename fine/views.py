@@ -1,9 +1,11 @@
 # pylint: disable=C0114
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
+from fine.froms import RegistrationForm
 from fine.models import RegistrationEvents, User, Interests
+from django.contrib.auth.hashers import make_password, check_password
 
 
 def get_menu_context():
@@ -29,14 +31,29 @@ def index_page(request: WSGIRequest):
     return render(request, 'pages/start/index.html', context)
 
 
-def cheack_for_none(user_id, model):
+def registration_page(request: WSGIRequest):
     """
-    Надо
+    Страница регистрации
+    """
+    context = {'pagename': 'Регистрация'}
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = User(username=form.cleaned_data['username'], password=make_password(form.cleaned_data['password2']),
+                        first_name=form.cleaned_data['first_name'], last_name=form.cleaned_data['last_name'],
+                        email=form.cleaned_data['email'])
+            user.save()
+            return redirect('/')
+        else:
+            pass
+    else:
+        form = RegistrationForm()
+    context['form'] = form
 
-    :param user_id:
-    :param model:
-    :return:
-    """
+    return render(request, 'registration/register.html', context)
+
+
+def cheack_for_none(user_id, model):
     try:
         temp = model.objects.get(user=user_id)
         return temp
