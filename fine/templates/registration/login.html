@@ -3,24 +3,23 @@
 {% load static %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/login.css' %}" />
+<link rel="stylesheet" href="{% static 'css/login.css' %}"/>
 <h1>Sign In</h1>
 <div id="wrapper">
-	<form action="{% url 'login' %}" method="POST">
-       <input type="text" id="user" name="user" placeholder="username" />
-       <input type="password" id="pass" name="pass" placeholder="password" />
-       <button type="submit">&#xf0da;</button>
-       <p>forgot your password? <a href="#">click here</a></p>
-	</form>
+    <form action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        <input type="text" id="user" name="user" placeholder="username"/>
+        <input type="password" id="pass" name="pass" placeholder="password"/>
+        <button type="submit">&#xf0da;</button>
+        <p>forgot your password? <a href="#">click here</a></p>
+    </form>
 
-  <div class="mt-5">
-    <a href="{% url 'register' %}" class="btn btn-outline-light" >Register</a>
-  </div>
+    <div class="mt-5">
+        <a href="{% url 'register' %}" class="btn btn-outline-light">Register</a>
+    </div>
 
 
 </div>
-
-
 
 
 {% endblock %}
