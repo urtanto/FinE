@@ -10,10 +10,13 @@
     <p>Фамилия:{{user.last_name}}</p>
     <p>Последний вход: {{user.last_login}}</p>
     {% if user.avatar %}
-        <img src="{%default_avatar.png.url}">
+        <img src="{{ user.avatar.url }}">
     {% endif %}
     {% if not user.avatar %}
         <img src="{%static 'images/default_avatar.png' %}">
     {% endif %}
+
+    <a href="{% url 'edition' %}">Редактировать профиль</a>
+
     Пользователь с {{user.date_joined.date}}
 {% endblock %}

@@ -102,13 +102,14 @@ def edit_page(request):
     form = EditProfile(instance=cur_user)
 
     if request.method == 'POST':
-        form = EditProfile(request.POST, instance=cur_user)
+        form = EditProfile(request.POST, request.FILES, instance=cur_user)
         if form.is_valid():
             form.save()
 
         if request.POST.get('select') is not None:
             Interests.objects.update_or_create(user=request.user,
                                            defaults={'interest': request.POST.get('select')})
+            User.Interest
 
         return redirect('/profile/' + str(request.user.id))
     context['form'] = form
