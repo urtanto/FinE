@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static 'css/login.css' %}" />
 <h1>Sign In</h1>
 <div id="wrapper">
-	<form id="signin" method="" action="" autocomplete="off">
+	<form action="{% url 'login' %}" method="POST">
        <input type="text" id="user" name="user" placeholder="username" />
        <input type="password" id="pass" name="pass" placeholder="password" />
        <button type="submit">&#xf0da;</button>
