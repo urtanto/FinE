@@ -2,32 +2,39 @@
 <html lang="en">
 
 {% load bootstrap5 %}
+{% load static %}
 
 <head>
     <meta charset="UTF-8">
     <title>{{ pagename }} - Simple votings</title>
 
     {% bootstrap_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}"/>
     {% block extra_css %}{% endblock %}
 </head>
 
 
-<body>
-
-<header>
+<body class="gradient-background">
+<header class="header container">
     {% include 'base/menu.html' %}
+    {% block header %}{% endblock %}
 </header>
 
-<main role="main" class="container">
-    {% bootstrap_messages %}
-    {% block content %} {% endblock %}
-</main>
+<div class="container borders">
+    <main role="main" class="container-fluid">
+        {% bootstrap_messages %}
+        {% block content %}{% endblock %}
+    </main>
+
+
+</div>
 
 {% block extracontent %} {% endblock %}
 
-<footer class="footer">
+<footer class="footer container">
     {% block footer %}
-    <div class="container text-right">
+    <div class="container text-right" style="margin: 0; padding: 0 0 0 3vh;">
         <span class="text-muted">&copy; ШП, {% now "Y" %}</span>
     </div>
     {% endblock %}
