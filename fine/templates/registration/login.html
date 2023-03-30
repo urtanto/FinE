@@ -1,26 +1,27 @@
 {% extends 'base/base.html' %}
 
-
-{% load bootstrap5 %}
-
+{% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}" />
+<h1>Sign In</h1>
+<div id="wrapper">
+	<form id="signin" method="" action="" autocomplete="off">
+       <input type="text" id="user" name="user" placeholder="username" />
+       <input type="password" id="pass" name="pass" placeholder="password" />
+       <button type="submit">&#xf0da;</button>
+       <p>forgot your password? <a href="#">click here</a></p>
+	</form>
 
-    <h1 class="mt-4">Авторизация (vasya-promprog)</h1>
-    <hr>
+  <div class="mt-5">
+    <a href="{% url 'register' %}" class="btn btn-outline-light" >Register</a>
+  </div>
 
-    <div class="row">
-        <div class="col-4 offset-4">
-            <form action="{% url 'login' %}" method="POST">
-                {% csrf_token %}
 
-                {% bootstrap_form form %}
-                {% buttons %}
-                    <button type="submit" class="btn btn-primary float-right btn-block">Войти</button>
-                {% endbuttons %}
-            </form>
-        </div>
-    </div>
+</div>
+
+
+
 
 {% endblock %}
 
