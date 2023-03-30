@@ -68,7 +68,8 @@ def profile_view_page(request: WSGIRequest, code: int):
     Профиль пользователя
     """
     context = {'pagename': 'Profile',
-               'menu': get_menu_context()}
+               'menu': get_menu_context(),
+               'cur_user': request.user}
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = cheack_for_none(code, RegistrationEvents)  # ивенты, на которые зарегался пользователь
