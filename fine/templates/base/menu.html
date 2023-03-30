@@ -1,20 +1,7 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="{% url 'index' %}">Simple votings</a>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto">
-            {% block menu %}
-            {% for item in menu %}
-            {% if item.url_name == "my_votings" and request.user.is_authenticated or item.url_name != "my_votings" %}
-            <li class="nav-item active">
-                <a class="nav-link" href="{% url item.url_name %}">{{ item.name }}</a>
-            </li>
-            {% endif %}
-            {% endfor %}
-            {% endblock %}
-        </ul>
-        <ul class="navbar-nav mr-1">
-            {% block usermenu %}
-            {% endblock %}
-        </ul>
-    </div>
-</nav>
+{% block menu %}
+{% for item in menu %}
+{% if item.url_name == "my_votings" and request.user.is_authenticated or item.url_name != "my_votings" %}
+<a class="btn btn-primary full-button" href="{% url item.url_name %}">{{ item.name }}</a>
+{% endif %}
+{% endfor %}
+{% endblock %}
