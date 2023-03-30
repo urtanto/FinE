@@ -1,0 +1,31 @@
+.gradient-background {
+    background: -webkit-linear-gradient(left, #3931af, #00c6ff);
+}
+
+.full-screen {
+    height: 94%;
+    width: 94%;
+}
+
+.footer {
+    padding: 1vw;
+    background: #fff;
+    margin-top: 2vh;
+    border-radius: 0.5rem;
+}
+
+.header {
+    padding: 1vw;
+    background: #fff;
+    margin-top: 2vh;
+    border-radius: 0.5rem;
+}
+
+.borders {
+    display: flex;
+    padding: 3vh;
+    background: #fff;
+    margin-top: 2vh;
+    border-radius: 0.5rem;
+    min-height: 77vh;
+}
