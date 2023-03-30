@@ -10,7 +10,9 @@
         {% csrf_token %}
         <input type="text" id="user" name="user" placeholder="username"/>
         <input type="password" id="pass" name="pass" placeholder="password"/>
+        {% button %}
         <button type="submit">&#xf0da;</button>
+        {% endbuttons %}
         <p>forgot your password? <a href="#">click here</a></p>
     </form>
 
