@@ -7,6 +7,9 @@
         <h1>Wellcome!</h1>
     </div>
 </div>
+{% if request.user.is_authenticated %}
+<p>DA</p>
+{% endif %}
 <a href="{% url 'login' %}">Войти</a>
 <p></p>
 <a href="{% url 'register' %}">Зарегистрироваться</a>
