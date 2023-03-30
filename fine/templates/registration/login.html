@@ -1,5 +1,6 @@
 {% extends 'base/base.html' %}
 
+{% load bootstrap5 %}
 {% load static %}
 
 {% block extra_css %}
@@ -9,10 +10,11 @@
 {% block content %}
 <h1>Sign In</h1>
 <div id="wrapper">
-    <form action="{% url 'login' %}" method="POST">
+    <form id="signin" action="{% url 'login' %}" method="POST">
         {% csrf_token %}
 
-        {% form %}
+        {{ form.username }}
+        {{ form.password }}
         {% buttons %}
         <button type="submit">&#xf0da;</button>
         {% endbuttons %}
