@@ -73,7 +73,7 @@ def profile_view_page(request: WSGIRequest, code: int):
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = cheack_for_none(code, RegistrationEvents)  # ивенты, на которые зарегался пользователь
-        context['interests'] = cheack_for_none(code, Interests)  # главный интерес пользователя
+        context['interests'] = User.objects.filter(id=code) # главный интерес пользователя
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
