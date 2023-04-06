@@ -105,6 +105,14 @@ def edit_page(request):
 
     return render(request, 'pages/profile/edit_about.html', context)
 
+def to_fit(arr, size, request):
+    if len(arr) > size:
+        for i in range(len(arr) - size):
+            arr[i].delete()
+    elif len(arr) < size:
+        for i in range(size - len(arr)):
+            arr.create(user=request.user, interest=0)
+
 @login_required
 def edit_interests_page(request):
     context = {
@@ -114,7 +122,21 @@ def edit_interests_page(request):
     if request.method == 'POST':
         form = InterestsForm(request.POST)
         if form.is_valid():
-            interests = form.cleaned_data.get('Countries')
+            interests = form.cleaned_data.get('Interests')
+            context['interests'] = interests
+
+            cur_interests = User.objects.get(id=request.user.id).interests_set.all()
+            to_fit(cur_interests, len(interests), request)
+
+
+            cur_interests = cur_interests.values('interest')
+            counter = 0
+
+            for i in cur_interests:
+                i['interest'] = interests[counter]
+                counter += 1
+            context['cur_interests'] = cur_interests
+
     else:
         form = InterestsForm
     context['form'] = form
