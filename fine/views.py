@@ -4,7 +4,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from fine.forms import EditProfile
+from fine.forms import EditProfile, InterestsForm
 from fine.froms import RegistrationForm
 from fine.models import RegistrationEvents, User, Interests
 from django.contrib.auth.hashers import make_password, check_password
@@ -81,13 +81,6 @@ def profile_view_page(request: WSGIRequest, code: int):
 
     return render(request, 'pages/profile/view.html', context)
 
-INTERESTS = {
-    0: 'Спорт',
-    1: 'Квесты',
-    2: 'Видеоигры',
-    3: 'Фильмы'
-}
-
 @login_required
 def edit_page(request):
     """
@@ -95,8 +88,8 @@ def edit_page(request):
     """
     context = {
         'pagename': 'Profile Editing',
-        'interests':  INTERESTS.items(),
         'menu': get_menu_context(),
+        'user': request.user
     }
 
     cur_user = User.objects.get(username=request.user.username)
@@ -107,12 +100,23 @@ def edit_page(request):
         if form.is_valid():
             form.save()
 
-        if request.POST.get('select') is not None:
-            Interests.objects.update_or_create(user=request.user,
-                                           defaults={'interest': request.POST.get('select')})
-            User.Interest
-
         return redirect('/profile/' + str(request.user.id))
     context['form'] = form
 
-    return render(request, 'pages/profile/edit.html', context)
+    return render(request, 'pages/profile/edit_about.html', context)
+
+@login_required
+def edit_interests_page(request):
+    context = {
+        'pagename': 'Profile Editing',
+        'menu': get_menu_context(),
+    }
+    if request.method == 'POST':
+        form = InterestsForm(request.POST)
+        if form.is_valid():
+            interests = form.cleaned_data.get('Countries')
+    else:
+        form = InterestsForm
+    context['form'] = form
+
+    return render(request, 'pages/profile/edit_interests.html', context)

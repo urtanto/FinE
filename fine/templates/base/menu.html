@@ -4,4 +4,11 @@
 <a class="btn btn-primary full-button" href="{% url item.url_name %}">{{ item.name }}</a>
 {% endif %}
 {% endfor %}
+
+{% if request.user.is_authenticated %}
+<a class="btn btn-primary full-button" href="/profile/{{request.user.id}}">Profile</a>
+{% endif %}
+{% if not request.user.is_authenticated %}
+<a class="btn btn-primary full-button" href="{% url 'login' %}">Login</a>
+{% endif %}
 {% endblock %}

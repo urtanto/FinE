@@ -8,8 +8,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="container emp-profile">
-            <form method="post">
+<form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="container emp-profile">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="profile-img">
@@ -19,14 +20,11 @@
                             {% if not user.avatar %}
                                 <img src="{%static 'images/default_avatar.png' %}">
                             {% endif %}
-                            {% if cur_user == user %}
-                            <a href="{% url 'edition_about' %}">
                                 <div class="file btn btn-lg btn-primary">
-                                    Change Profile
-
+                                    <input type="checkbox" name="avatar-clear" id="avatar-clear_id">
+                                    Change Avatar
+                                    <input type="file" name="avatar" accept="image/*" id="id_avatar">
                                 </div>
-                            </a>
-                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -50,49 +48,51 @@
                             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label>User Id</label>
+                                                <label for="id_username">Username:</label>
                                             </div>
                                             <div class="col-md-6">
-                                                <p>{{user.id}}</p>
+                                                <input type="text" name="username" value="{{user.username}}" maxlength="150" required id="id_username">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label>Name</label>
+                                                <label for="id_first_name">First Name:</label>
                                             </div>
                                             <div class="col-md-6">
-                                                <p>{{user.first_name}} {{user.last_name}}</p>
+                                                <input type="text" name="first_name" value="{{user.first_name}}" maxlength="150" required id="id_first_name">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label>Email</label>
+                                                <label for="id_last_name">Last Name:</label>
                                             </div>
                                             <div class="col-md-6">
-                                                <p>{{user.email}}</p>
+                                                <input type="text" name="last_name" value="{{user.last_name}}" maxlength="150" required id="id_last_name">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label>Phone</label>
+                                                <label for="id_email">Email:</label>
                                             </div>
                                             <div class="col-md-6">
-                                                <p>{{user.phone_number}}</p>
+                                                <input type="email" name="email" value="{{user.email}}" maxlength="254" required id="id_email">
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label>User from</label>
+                                                <label for="id_phone_number">Phone Number:</label>
                                             </div>
                                             <div class="col-md-6">
-                                                <p>{{user.date_joined.date}}</p>
+                                                <input type="text" name="phone_number" value="{{user.phone_number}}" maxlength="15" required id="id_phone_number">
                                             </div>
                                         </div>
+                                <button type="submit">Сохранить изменения</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
-</div>
-{% endblock %}
+        </div>
+</form>
 
+
+{% endblock %}
