@@ -54,14 +54,12 @@ def registration_page(request: WSGIRequest):
 
     return render(request, 'registration/register.html', context)
 
-
-def cheack_for_none(user, model):
-    try:
-        temp = model.objects.get(user=user)
-        return temp
-    except model.DoesNotExist:
-        return None
-
+INTERESTS = {
+        0: 'Спорт',
+        1: 'Квесты',
+        2: 'Видеоигры',
+        3: 'Фильмы'
+}
 
 def profile_view_page(request: WSGIRequest, code: int):
     """
@@ -69,11 +67,17 @@ def profile_view_page(request: WSGIRequest, code: int):
     """
     context = {'pagename': 'Profile',
                'menu': get_menu_context(),
-               'cur_user': request.user}
+               'cur_user': request.user }
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
-        context['events'] = cheack_for_none(code, RegistrationEvents)  # ивенты, на которые зарегался пользователь
-        context['interests'] = User.objects.filter(id=code) # главный интерес пользователя
+        context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
+
+        context['interests'] = []  # интересы пользователя
+        Interests.objects.filter(user=code).values_list('interest', flat=True)
+        for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
+            context['interests'].append(INTERESTS[i])
+
+
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
@@ -99,7 +103,6 @@ def edit_page(request):
         form = EditProfile(request.POST, request.FILES, instance=cur_user)
         if form.is_valid():
             form.save()
-
         return redirect('/profile/' + str(request.user.id))
     context['form'] = form
 
@@ -128,12 +131,9 @@ def edit_interests_page(request):
             cur_interests = User.objects.get(id=request.user.id).interests_set.all()
             to_fit(cur_interests, len(interests), request)
 
-
-            cur_interests = cur_interests.values('interest')
             counter = 0
-
-            for i in cur_interests:
-                i['interest'] = interests[counter]
+            for i in cur_interests.values_list('id', flat=True):
+                Interests.objects.filter(id=i).update(interest=int(interests[counter]))
                 counter += 1
             context['cur_interests'] = cur_interests
 
