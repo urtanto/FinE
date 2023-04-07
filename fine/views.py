@@ -137,6 +137,7 @@ def edit_interests_page(request):
                 counter += 1
             context['cur_interests'] = cur_interests
 
+            return redirect('/profile/' + str(request.user.id))
     else:
         form = InterestsForm
     context['form'] = form
