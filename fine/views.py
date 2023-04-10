@@ -68,6 +68,7 @@ def event_create_page(request: WSGIRequest):
         form = CreateEvent(request.POST)
         if form.is_valid():
             event = Event(name=form.cleaned_data['name'],
+                          type=form.cleaned_data['type'],
                           address=form.cleaned_data['address'],
                           status=form.cleaned_data['status'], start_day=form.cleaned_data['start_day'],
                           finish_day=form.cleaned_data['finish_day'], description=form.cleaned_data['description'],
