@@ -84,6 +84,24 @@ def event_create_page(request: WSGIRequest):
     return render(request, 'pages/event/create.html', context)
 
 
+@login_required
+def event_edit_page(request: WSGIRequest, event_id: int):
+    context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
+    event = Event.objects.get(pk=event_id)
+    form = CreateEvent(instance=event)
+    if form.is_valid():
+        event = Event(name=form.cleaned_data['name'],
+                      type=form.cleaned_data['type'],
+                      address=form.cleaned_data['address'],
+                      status=form.cleaned_data['status'], start_day=form.cleaned_data['start_day'],
+                      finish_day=form.cleaned_data['finish_day'], description=form.cleaned_data['description'],
+                      entertainment_type=form.cleaned_data['entertainment_type'],
+                      author=request.user)
+        event.save()
+    context['form'] = form
+    return render(request, 'pages/event/edit.html', context)
+
+
 def profile_view_page(request: WSGIRequest, code: int):
     """
     Профиль пользователя
