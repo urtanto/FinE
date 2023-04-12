@@ -94,9 +94,11 @@ def event_edit_page(request: WSGIRequest, event_id: int):
     """
     context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
     event = Event.objects.get(pk=event_id)
-    form = CreateEvent(request.POST, instance=event)
-    if form.is_valid():
-        form.save()
+    form = CreateEvent(instance=event)
+    if request.method == 'POST':
+        form = CreateEvent(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
     context['form'] = form
     return render(request, 'pages/event/edit.html', context)
 
