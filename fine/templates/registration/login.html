@@ -13,8 +13,8 @@
     <form id="signin" action="{% url 'login' %}" method="POST">
         {% csrf_token %}
 
-        {{ form.username }}
-        {{ form.password }}
+        <a>User name: {{ form.username }} </a>
+        <a>Password: {{ form.password }} </a>
         {% buttons %}
         <button type="submit">&#xf0da;</button>
         {% endbuttons %}
@@ -22,7 +22,7 @@
     </form>
 
     <div class="mt-5">
-        <a href="{% url 'register' %}" class="btn btn-outline-light">Register</a>
+        <a href="{% url 'register' %}" class="btn btn-outline-info">Register</a>
     </div>
 </div>
 

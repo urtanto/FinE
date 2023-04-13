@@ -6,7 +6,7 @@
 }
 
 h1{
-	color: rgb(255, 255, 255);
+	color: rgb(0, 149, 182);
 	margin: 20px auto 0;
 	width: 200px;
 	text-align: center;
@@ -22,32 +22,32 @@ h1{
 
 /* === Sign in Form === */
 #signin {
-	height: 90px;
+	height: 150px;
 	width: 300px;
-	border-radius: 8px;
+	border-radius: 4px;
 	position: relative;
 }
 #signin::before {
 	display: block;
 	position: relative;
 	height: 2px;
-	background: rgb(52, 56, 61);
+	background: rgb(0, 149, 182);
 	content: '';
-	top: 44px;
-	margin-left: 20px;
+	top: 67px;
+	margin-left: 0px;
 	z-index: 1;
 }
 #signin input:first-of-type{
-	border-top-right-radius: 8px;
-	border-top-left-radius: 8px;
+	border-top-right-radius: 15px;
+	border-top-left-radius: 15px;
 }
 #signin input:last-of-type{
-	border-bottom-right-radius: 8px;
-	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 15px;
+	border-bottom-left-radius: 15px;
 }
 #signin  input[type="text"], #signin  input[type="password"], #signin button[type="submit"]{
-	background: rgb(28, 30, 33);
-	box-shadow: inset -100px -100px 0 rgb(28, 30, 33); /*Prevent yellow autofill color*/
+	background: rgb(52, 56, 61);
+	box-shadow: inset -100px -100px 0 rgb(255, 255, 255); /*Prevent yellow autofill color*/
 	color: rgb(52, 56, 61);
 }
 #signin  input[type="text"], #signin  input[type="password"]{
@@ -62,7 +62,7 @@ h1{
 	font-weight: 700;
 }
 #signin  input[type="text"]:focus, #signin  input[type="password"]:focus{
-	color: rgb(255, 255, 255);
+	color: rgb(0, 0, 0);
 }
 #signin button[type="submit"]{
 	display: block;
@@ -73,9 +73,9 @@ h1{
 	border-radius: 50px;
 	outline: 0;
 	z-index: 2;
-	top: 19px;
+	top: 41px;
 	right: -24px;
-	border: 6px solid rgb(52, 56, 61);
+	border: 6px solid rgb(0, 149, 182);
 	font-size: 25px;
 	text-indent: 0px;
 	padding-left: 9px;
