@@ -62,7 +62,10 @@ def cheack_for_none(user_id, model):
 
 
 @login_required
-def event_create_page(request: WSGIRequest):
+def event_create_page(request):
+    """
+    Функция по созданию ивента
+    """
     context = {'pagename': 'CreateEvent', 'menu': get_menu_context()}
     if request.method == 'POST':
         form = CreateEvent(request.POST)
@@ -82,6 +85,22 @@ def event_create_page(request: WSGIRequest):
         form = CreateEvent()
     context['form'] = form
     return render(request, 'pages/event/create.html', context)
+
+
+@login_required
+def event_edit_page(request: WSGIRequest, event_id: int):
+    """
+    Функция по изменению ивента
+    """
+    context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
+    event = Event.objects.get(pk=event_id)
+    form = CreateEvent(instance=event)
+    if request.method == 'POST':
+        form = CreateEvent(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+    context['form'] = form
+    return render(request, 'pages/event/edit.html', context)
 
 
 def profile_view_page(request: WSGIRequest, code: int):

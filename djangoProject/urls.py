@@ -35,7 +35,8 @@ urlpatterns = [
          ),
          name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('event/create/', views.event_create_page, name='create'),
+    path('event/create/', views.event_create_page, name='event_create'),
+    path('event/edit/<int:event_id>', views.event_edit_page, name='event_edit'),
     path('registration/', views.registration_page, name='register'),
 ]
 
