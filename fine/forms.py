@@ -23,4 +23,4 @@ class CreateEvent(ModelForm):
     """
     class Meta:
         model = Event
-        fields = ['name', 'type', 'address', 'status', 'start_day', 'finish_day', 'description', 'entertainment_type']
+        fields = ['name', 'type', 'address', 'start_day', 'finish_day', 'description', 'entertainment_type']
