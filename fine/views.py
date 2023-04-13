@@ -5,8 +5,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm
-from fine.froms import RegistrationForm
-from fine.models import RegistrationEvents, User, Interests
+from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -76,15 +75,29 @@ def profile_view_page(request: WSGIRequest, code: int):
         Interests.objects.filter(user=code).values_list('interest', flat=True)
         for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
             context['interests'].append(INTERESTS[i])
-
-
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
         raise Http404
 
+    try:
+        friend = Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code))
+        context['waiting_friend'] = friend.waiting
+
+    except Friends.DoesNotExist:
+        context['already_friend'] = False
+
+
     if request.method == 'POST':
-        a = request.POST.get('friend_button')
+        if request.POST.get('friend_button'):
+            Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
+        if request.POST.get('del_request'):
+            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+        if request.POST.get('del_friend'):
+            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+            Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
+
+        return redirect('/profile/' + str(code))
 
 
     return render(request, 'pages/profile/view.html', context)
@@ -147,3 +160,17 @@ def edit_interests_page(request):
     context['form'] = form
 
     return render(request, 'pages/profile/edit_interests.html', context)
+
+@login_required
+def friends_page(request):
+    """
+    Редактирование Профиля
+    """
+    context = {
+        'pagename': 'Profile Editing',
+        'menu': get_menu_context(),
+        'user': request.user
+    }
+
+
+    return render(request, 'pages/friends/friends.html', context)

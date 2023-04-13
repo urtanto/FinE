@@ -29,7 +29,15 @@
                             {% if cur_user != user %}
                             <form action="#" method="post">
                                 {% csrf_token %}
-                                <button type="submit" value="friend" name="friend_button">Friend request</button>
+                                {% if already_friend is False %}
+                                    <button type="submit" value="friend" name="friend_button">Friend request</button>
+                                {% endif %}
+                                {% if waiting_friend is True %}
+                                    <button type="submit" value="del_request" name="del_request">Delete friend request</button>
+                                {% endif %}
+                                {% if waiting_friend is False %}
+                                    <button type="submit" value="del_friend" name="del_friend">Delete friend</button>
+                                {% endif %}
                             </form>
                             {% endif %}
                         </div>
