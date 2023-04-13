@@ -83,6 +83,10 @@ def profile_view_page(request: WSGIRequest, code: int):
         context['interests'] = None
         raise Http404
 
+    if request.method == 'POST':
+        a = request.POST.get('friend_button')
+
+
     return render(request, 'pages/profile/view.html', context)
 
 @login_required
