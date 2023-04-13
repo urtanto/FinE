@@ -38,6 +38,8 @@ urlpatterns = [
     path('event/create/', views.event_create_page, name='event_create'),
     path('event/edit/<int:event_id>', views.event_edit_page, name='event_edit'),
     path('registration/', views.registration_page, name='register'),
+    path('profile/edit/about', views.edit_page, name='edition_about'),
+    path('profile/edit/interests', views.edit_interests_page, name='edition_interests')
 ]
 
 if settings.DEBUG:
