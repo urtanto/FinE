@@ -8,7 +8,7 @@ from fine.forms import EditProfile, InterestsForm
 from fine.froms import RegistrationForm
 from fine.models import RegistrationEvents, User, Interests
 from django.contrib.auth.decorators import login_required
-from fine.froms import RegistrationForm, CreateEvent
+from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -76,7 +76,7 @@ def event_create_page(request):
             event = Event(name=form.cleaned_data['name'],
                           type=form.cleaned_data['type'],
                           address=form.cleaned_data['address'],
-                          status=form.cleaned_data['status'], start_day=form.cleaned_data['start_day'],
+                          start_day=form.cleaned_data['start_day'],
                           finish_day=form.cleaned_data['finish_day'], description=form.cleaned_data['description'],
                           entertainment_type=form.cleaned_data['entertainment_type'],
                           author=request.user)
