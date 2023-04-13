@@ -2,9 +2,9 @@
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
-
-from fine.froms import RegistrationForm
-from fine.models import RegistrationEvents, User, Interests
+from django.contrib.auth.decorators import login_required
+from fine.froms import RegistrationForm, CreateEvent
+from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
 
 
@@ -61,6 +61,29 @@ def cheack_for_none(user_id, model):
         return None
 
 
+@login_required
+def event_create_page(request: WSGIRequest):
+    context = {'pagename': 'CreateEvent', 'menu': get_menu_context()}
+    if request.method == 'POST':
+        form = CreateEvent(request.POST)
+        if form.is_valid():
+            event = Event(name=form.cleaned_data['name'],
+                          type=form.cleaned_data['type'],
+                          address=form.cleaned_data['address'],
+                          status=form.cleaned_data['status'], start_day=form.cleaned_data['start_day'],
+                          finish_day=form.cleaned_data['finish_day'], description=form.cleaned_data['description'],
+                          entertainment_type=form.cleaned_data['entertainment_type'],
+                          author=request.user)
+            event.save()
+            return redirect('/')
+        else:
+            pass
+    else:
+        form = CreateEvent()
+    context['form'] = form
+    return render(request, 'pages/event/create.html', context)
+
+
 def profile_view_page(request: WSGIRequest, code: int):
     """
     Профиль пользователя
@@ -68,7 +91,7 @@ def profile_view_page(request: WSGIRequest, code: int):
     context = {'pagename': 'Profile',
                'menu': get_menu_context()}
     try:
-        context['user'] = User.objects.get(user_id=code)  # все поля из модели для пользователя с id = code
+        context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = cheack_for_none(code, RegistrationEvents)  # ивенты, на которые зарегался пользователь
         context['interests'] = cheack_for_none(code, Interests)  # интересы пользователя
     except User.DoesNotExist:
