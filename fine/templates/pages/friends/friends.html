@@ -4,10 +4,92 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/.css' %}"/>
 {% endblock %}
 
 {% block content %}
+
+{% if friends_size == 0 %}
+<h1>У Вас нет друзей.</h1>
+{% endif %}
+{% if friends_size > 0 %}
+    <h1>Друзья пользователя:</h1>
+    {% for i in friends %}
+    <div class="card" style="width: 18rem;">
+        {% if i.from_user.avatar %}
+            <img class="card-img-top" src="{{i.from_user.avatar.url}}" alt="Card image cap">
+        {% endif %}
+        {% if not i.from_user.avatar %}
+            <img class="card-img-top" src="{% static 'images/default_avatar.png' %}" alt="Card image cap">
+        {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{i.from_user.username}}</h5>
+        <p class="card-text">{{i.from_user.first_name}} {{i.from_user.last_name}}</p>
+      </div>
+      <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" value="{{i.id}}" name="del_friend">Delete Friend</button>
+        </form>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+{% if friends_request_to_user_size == 0 %}
+<h1>Нет отправленных пользователю запросов на дружбу.</h1>
+{% endif %}
+{% if friends_request_to_user_size > 0 %}
+    <h1>Запросы на дружбу, отправленные пользователю:</h1>
+    {% for i in friends_request_to_user %}
+    <div class="card" style="width: 18rem;">
+        {% if i.from_user.avatar %}
+            <img class="card-img-top" src="{{i.from_user.avatar.url}}" alt="Card image cap">
+        {% endif %}
+        {% if not i.from_user.avatar %}
+            <img class="card-img-top" src="{% static 'images/default_avatar.png' %}" alt="Card image cap">
+        {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{i.from_user.username}}</h5>
+        <p class="card-text">{{i.from_user.first_name}} {{i.from_user.last_name}}</p>
+      </div>
+      <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" value="{{i.id}}" name="accept_from_request">Accept request</button>
+            <button type="submit" value="{{i.id}}" name="cancel_from_request">Cancel request</button>
+        </form>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+{% if friends_request_by_user_size == 0 %}
+<h1>Нет отправленных пользователем запросов на дружбу.</h1>
+{% endif %}
+{% if friends_request_by_user_size > 0 %}
+    <h1>Запросы на дружбу, отправленные пользователем:</h1>
+    {% for i in friends_request_by_user %}
+    <div class="card" style="width: 18rem;">
+        {% if i.to_user.avatar %}
+            <img class="card-img-top" src="{{i.to_user.avatar.url}}" alt="Card image cap">
+        {% endif %}
+        {% if not i.to_user.avatar %}
+            <img class="card-img-top" src="{%static 'images/default_avatar.png' %}" alt="Card image cap">
+        {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{i.to_user.username}}</h5>
+        <p class="card-text">{{i.to_user.first_name}} {{i.to_user.last_name}}</p>
+      </div>
+      <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" value="{{i.id}}" name="cancel_to_request">Cancel request</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+{% endif %}
 
 {% endblock %}
 

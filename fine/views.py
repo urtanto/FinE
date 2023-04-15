@@ -87,6 +87,12 @@ def profile_view_page(request: WSGIRequest, code: int):
     except Friends.DoesNotExist:
         context['already_friend'] = False
 
+    try:
+        Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user, waiting=True)
+        context['have_request'] = True
+    except Friends.DoesNotExist:
+        context['have_request'] = False
+
 
     if request.method == 'POST':
         if request.POST.get('friend_button'):
@@ -96,6 +102,9 @@ def profile_view_page(request: WSGIRequest, code: int):
         if request.POST.get('del_friend'):
             Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
             Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
+        if request.POST.get('acp_friend'):
+            Friends.objects.create(to_user=User.objects.get(id=code), from_user=request.user, waiting=False)
+            Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(waiting=False)
 
         return redirect('/profile/' + str(code))
 
@@ -164,13 +173,36 @@ def edit_interests_page(request):
 @login_required
 def friends_page(request):
     """
-    Редактирование Профиля
+    Страница с друзьями пользователя
     """
     context = {
-        'pagename': 'Profile Editing',
+        'pagename': 'Friends',
         'menu': get_menu_context(),
-        'user': request.user
+        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
+        'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
+        'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
     }
+    context['friends_size'] = len(context['friends'])
+    context['friends_request_to_user_size'] = len(context['friends_request_to_user'])
+    context['friends_request_by_user_size'] = len(context['friends_request_by_user'])
 
+    if request.method == 'POST':
+        if request.POST.get('cancel_to_request'):
+            Friends.objects.get(id=request.POST.get('cancel_to_request')).delete()
+
+        if request.POST.get('accept_from_request'):
+            friend = Friends.objects.get(id=request.POST.get('accept_from_request'))
+            Friends.objects.create(to_user=friend.from_user, from_user=request.user, waiting=False)
+            Friends.objects.filter(id=request.POST.get('accept_from_request')).update(waiting=False)
+
+        if request.POST.get('cancel_from_request'):
+            Friends.objects.get(id=request.POST.get('cancel_from_request')).delete()
+
+        if request.POST.get('del_friend'):
+            friend = Friends.objects.get(id=request.POST.get('del_friend'))
+            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
+            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
+        return redirect('/friends/')
 
     return render(request, 'pages/friends/friends.html', context)
