@@ -247,7 +247,7 @@ def event_page(request: WSGIRequest, event_id: int):
         people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=event_id))
         friends: list[User] = list(map(get_user, friends))
         people: list[User] = list(map(get_user, people))
-        event.description = "adada " * 1000
+        event.description = "adada "
         context['event'] = event
         context['friends'] = friends
         context['people'] = people
