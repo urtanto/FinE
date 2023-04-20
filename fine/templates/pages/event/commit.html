@@ -1,0 +1,8 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <form method="post" action='{% url "event_commit" event_id %}'>
+        {% csrf_token %}
+        <button type="submit">Иду</button>
+    </form>
+{% endblock %}

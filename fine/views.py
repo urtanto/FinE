@@ -4,11 +4,8 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from fine.forms import EditProfile, InterestsForm
-from fine.froms import RegistrationForm
-from fine.models import RegistrationEvents, User, Interests
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
 from django.contrib.auth.decorators import login_required
-from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -57,12 +54,14 @@ def registration_page(request: WSGIRequest):
 
     return render(request, 'registration/register.html', context)
 
+
 INTERESTS = {
-        0: 'Спорт',
-        1: 'Квесты',
-        2: 'Видеоигры',
-        3: 'Фильмы'
+    0: 'Спорт',
+    1: 'Квесты',
+    2: 'Видеоигры',
+    3: 'Фильмы'
 }
+
 
 @login_required
 def event_create_page(request):
@@ -106,13 +105,25 @@ def event_edit_page(request: WSGIRequest, event_id: int):
     return render(request, 'pages/event/edit.html', context)
 
 
+@login_required
+def commit_event_page(request, event_id):
+    """
+    Добавляет пользователя в мероприятие
+    """
+    context = {'pagename': 'Commit Event', 'menu': get_menu_context(), 'event_id': event_id}
+    event = Event.objects.get(pk=event_id)
+    if request.method == "POST":
+        request.user.events.add(event)
+    return render(request, 'pages/start/index.html', context)
+
+
 def profile_view_page(request: WSGIRequest, code: int):
     """
     Профиль пользователя
     """
     context = {'pagename': 'Profile',
                'menu': get_menu_context(),
-               'cur_user': request.user }
+               'cur_user': request.user}
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
@@ -129,6 +140,7 @@ def profile_view_page(request: WSGIRequest, code: int):
         raise Http404
 
     return render(request, 'pages/profile/view.html', context)
+
 
 @login_required
 def edit_page(request):
@@ -153,6 +165,7 @@ def edit_page(request):
 
     return render(request, 'pages/profile/edit_about.html', context)
 
+
 def to_fit(arr, size, request):
     if len(arr) > size:
         for i in range(len(arr) - size):
@@ -160,6 +173,7 @@ def to_fit(arr, size, request):
     elif len(arr) < size:
         for i in range(size - len(arr)):
             arr.create(user=request.user, interest=0)
+
 
 @login_required
 def edit_interests_page(request):
