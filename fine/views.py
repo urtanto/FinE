@@ -5,8 +5,6 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm
-from fine.froms import RegistrationForm
-from fine.models import RegistrationEvents, User, Interests
 from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
@@ -57,12 +55,14 @@ def registration_page(request: WSGIRequest):
 
     return render(request, 'registration/register.html', context)
 
+
 INTERESTS = {
-        0: 'Спорт',
-        1: 'Квесты',
-        2: 'Видеоигры',
-        3: 'Фильмы'
+    0: 'Спорт',
+    1: 'Квесты',
+    2: 'Видеоигры',
+    3: 'Фильмы'
 }
+
 
 @login_required
 def event_create_page(request):
@@ -112,7 +112,7 @@ def profile_view_page(request: WSGIRequest, code: int):
     """
     context = {'pagename': 'Profile',
                'menu': get_menu_context(),
-               'cur_user': request.user }
+               'cur_user': request.user}
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
@@ -129,6 +129,7 @@ def profile_view_page(request: WSGIRequest, code: int):
         raise Http404
 
     return render(request, 'pages/profile/view.html', context)
+
 
 @login_required
 def edit_page(request):
@@ -153,6 +154,7 @@ def edit_page(request):
 
     return render(request, 'pages/profile/edit_about.html', context)
 
+
 def to_fit(arr, size, request):
     if len(arr) > size:
         for i in range(len(arr) - size):
@@ -160,6 +162,7 @@ def to_fit(arr, size, request):
     elif len(arr) < size:
         for i in range(size - len(arr)):
             arr.create(user=request.user, interest=0)
+
 
 @login_required
 def edit_interests_page(request):
