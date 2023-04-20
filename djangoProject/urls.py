@@ -39,7 +39,8 @@ urlpatterns = [
     path('event/edit/<int:event_id>', views.event_edit_page, name='event_edit'),
     path('registration/', views.registration_page, name='register'),
     path('profile/edit/about', views.edit_page, name='edition_about'),
-    path('profile/edit/interests', views.edit_interests_page, name='edition_interests')
+    path('profile/edit/interests', views.edit_interests_page, name='edition_interests'),
+    path('friends/', views.friends_page, name='friends')
 ]
 
 if settings.DEBUG:
