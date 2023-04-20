@@ -28,4 +28,13 @@
     margin-top: 2vh;
     border-radius: 0.5rem;
     min-height: 77vh;
+    max-height: 77vh;
+}
+
+.np {
+    padding: 0 0 0 0;
+}
+
+a {
+    text-decoration: none;
 }

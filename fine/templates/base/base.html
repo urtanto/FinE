@@ -16,13 +16,13 @@
 
 
 <body class="gradient-background">
-<header class="header container">
+<header class="header container" style="padding: 10px;">
     {% include 'base/menu.html' %}
     {% block header %}{% endblock %}
 </header>
 
 <div class="container borders">
-    <main role="main" class="container-fluid">
+    <main role="main" class="container-fluid np">
         {% bootstrap_messages %}
         {% block content %}{% endblock %}
     </main>
