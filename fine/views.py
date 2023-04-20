@@ -112,8 +112,7 @@ def commit_event_page(request, event_id):
     """
     context = {'pagename': 'Commit Event', 'menu': get_menu_context(), 'event_id': event_id}
     event = Event.objects.get(pk=event_id)
-    if request.method == "POST":
-        request.user.events.add(event)
+    request.user.events.add(event)
     return render(request, 'pages/start/index.html', context)
 
 
