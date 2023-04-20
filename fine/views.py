@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm
 from fine.forms import RegistrationForm
-from fine.models import RegistrationEvents, User, Interests
+from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
@@ -123,12 +123,39 @@ def profile_view_page(request: WSGIRequest, code: int):
         Interests.objects.filter(user=code).values_list('interest', flat=True)
         for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
             context['interests'].append(INTERESTS[i])
-
-
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
         raise Http404
+
+    try:
+        friend = Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code))
+        context['waiting_friend'] = friend.waiting
+
+    except Friends.DoesNotExist:
+        context['already_friend'] = False
+
+    try:
+        Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user, waiting=True)
+        context['have_request'] = True
+    except Friends.DoesNotExist:
+        context['have_request'] = False
+
+
+    if request.method == 'POST':
+        if request.POST.get('friend_button'):
+            Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
+        if request.POST.get('del_request'):
+            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+        if request.POST.get('del_friend'):
+            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+            Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
+        if request.POST.get('acp_friend'):
+            Friends.objects.create(to_user=User.objects.get(id=code), from_user=request.user, waiting=False)
+            Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(waiting=False)
+
+        return redirect('/profile/' + str(code))
+
 
     return render(request, 'pages/profile/view.html', context)
 
@@ -215,3 +242,42 @@ def event_page(request: WSGIRequest, event_id: int):
     except IndexError:
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
+
+
+
+@login_required
+def friends_page(request):
+    """
+    Страница с друзьями пользователя
+    """
+    context = {
+        'pagename': 'Friends',
+        'menu': get_menu_context(),
+        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
+        'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
+        'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
+    }
+    context['friends_size'] = len(context['friends'])
+    context['friends_request_to_user_size'] = len(context['friends_request_to_user'])
+    context['friends_request_by_user_size'] = len(context['friends_request_by_user'])
+
+    if request.method == 'POST':
+        if request.POST.get('cancel_to_request'):
+            Friends.objects.get(id=request.POST.get('cancel_to_request')).delete()
+
+        if request.POST.get('accept_from_request'):
+            friend = Friends.objects.get(id=request.POST.get('accept_from_request'))
+            Friends.objects.create(to_user=friend.from_user, from_user=request.user, waiting=False)
+            Friends.objects.filter(id=request.POST.get('accept_from_request')).update(waiting=False)
+
+        if request.POST.get('cancel_from_request'):
+            Friends.objects.get(id=request.POST.get('cancel_from_request')).delete()
+
+        if request.POST.get('del_friend'):
+            friend = Friends.objects.get(id=request.POST.get('del_friend'))
+            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
+            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
+        return redirect('/friends/')
+
+    return render(request, 'pages/friends/friends.html', context)
