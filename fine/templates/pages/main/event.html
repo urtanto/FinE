@@ -4,6 +4,7 @@
 {% load static %}
 
 {% block content %}
+{% csrf_token %}
 <div class="container np" style="height: 100%;">
     <div class="row" style="height: 100%;">
         <div class="col-5" style="height: 100%;">
@@ -14,8 +15,15 @@
                     <li class="list-group-item"><h6>{{event.author.first_name}} {{event.author.last_name}} <a
                             href="{% url 'profile' code=event.author.id %}">@{{event.author.username}}</a></h6></li>
                 </ul>
-                <div class="card-footer" style="overflow-y: auto;">
-                    {{ event.description }}
+                <ul class="list-group list-group-flush" style="overflow-y: auto;">
+                    <li class="list-group-item">{{ event.description }}</li>
+                </ul>
+                <div class="card-footer">
+                    {% if going %}
+                    <button id="mybtn" onclick="myclick()" class="btn btn-outline-success w-100">Иду</button>
+                    {% else %}
+                    <button id="mybtn" onclick="myclick()" class="btn btn-success w-100">Пойду</button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -54,7 +62,7 @@
                 <h4 style="height: 30px; margin-bottom: 10px;">Все люди:</h4>
                 <div class="row flex-grow-1 overflow-auto">
                     <div class="col">
-                    {% for user in people %}
+                        {% for user in people %}
                         <div class="card mb-2" style="width: 100%;">
                             <div>
                                 <div style="display: inline-block;">
@@ -83,4 +91,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/event.js' %}"></script>
 {% endblock %}

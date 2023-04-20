@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
+import json
 
 
 def get_menu_context():
@@ -141,7 +142,6 @@ def profile_view_page(request: WSGIRequest, code: int):
     except Friends.DoesNotExist:
         context['have_request'] = False
 
-
     if request.method == 'POST':
         if request.POST.get('friend_button'):
             Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
@@ -152,10 +152,10 @@ def profile_view_page(request: WSGIRequest, code: int):
             Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
         if request.POST.get('acp_friend'):
             Friends.objects.create(to_user=User.objects.get(id=code), from_user=request.user, waiting=False)
-            Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(waiting=False)
+            Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(
+                waiting=False)
 
         return redirect('/profile/' + str(code))
-
 
     return render(request, 'pages/profile/view.html', context)
 
@@ -222,8 +222,11 @@ def edit_interests_page(request):
     return render(request, 'pages/profile/edit_interests.html', context)
 
 
-def get_user(registration_event: RegistrationEvents) -> User:
-    return registration_event.user
+def get_user(received_object: RegistrationEvents | Friends) -> User:
+    if isinstance(received_object, Friends):
+        return received_object.from_user
+    return received_object.user
+
 
 @login_required
 def event_page(request: WSGIRequest, event_id: int):
@@ -233,16 +236,25 @@ def event_page(request: WSGIRequest, event_id: int):
     }
     try:
         event: Event = list(Event.objects.filter(id=int(event_id)))[0]
-        people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=int(event_id)))
+        if request.method == 'POST':
+            print("*click*")
+            data = json.loads(request.body)
+            if data["going"]:
+                RegistrationEvents.objects.get(event=event, user=request.user).delete()
+            else:
+                RegistrationEvents.objects.create(event=event, user=request.user)
+        friends: list[Friends] = list(Friends.objects.filter(to_user=request.user, waiting=False))
+        people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=event_id))
+        friends: list[User] = list(map(get_user, friends))
         people: list[User] = list(map(get_user, people))
         event.description = "adada " * 1000
         context['event'] = event
-        context['friends'] = people * 2
-        context['people'] = people * 5
+        context['friends'] = friends
+        context['people'] = people
+        context['going'] = True if request.user in people else False
     except IndexError:
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
-
 
 
 @login_required
