@@ -216,6 +216,7 @@ def edit_interests_page(request):
 
     return render(request, 'pages/profile/edit_interests.html', context)
 
+
 @login_required
 def friends_page(request):
     """
