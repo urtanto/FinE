@@ -1,10 +1,16 @@
 image: python:3.10
 
-stages:          # List of stages for jobs, and their order of execution
+stages: # List of stages for jobs, and their order of execution
   - test
+  - style
 
 
-unit-test-job:   # This job runs in the test stage.
+unit-test-job: # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
     - echo "Running unit tests..."
+
+pylint-job:
+  stage: style
+  script:
+    - echo "pylint moment"
