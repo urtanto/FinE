@@ -26,20 +26,20 @@
                         </div>
                     </a>
                     {% endif %}
-                    {% if cur_user != user %}
+                    {% if cur_user != user and cur_user.is_authenticated %}
                     <form method="post">
                         {% csrf_token %}
                         {% if already_friend is False and have_request is False %}
-                        <button type="submit" value="friend" name="friend_button">Friend request</button>
+                        <button type="submit" class="btn btn-outline-primary" value="friend_button" name="button">Friend request</button>
                         {% endif %}
                         {% if waiting_friend is True and have_request is False %}
-                        <button type="submit" value="del_request" name="del_request">Delete friend request</button>
+                        <button type="submit" class="btn btn-outline-primary" value="del_request" name="button">Delete friend request</button>
                         {% endif %}
                         {% if waiting_friend is False and have_request is False %}
-                        <button type="submit" value="del_friend" name="del_friend">Delete friend</button>
+                        <button type="submit" class="btn btn-outline-primary" value="del_friend" name="button">Delete friend</button>
                         {% endif %}
                         {% if have_request is True %}
-                        <button type="submit" value="acp_friend" name="acp_friend">Accept friend</button>
+                        <button type="submit" class="btn btn-outline-primary" value="acp_friend" name="button">Accept friend</button>
                         {% endif %}
                     </form>
                     {% endif %}
