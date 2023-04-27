@@ -28,7 +28,8 @@ def index_page(request: WSGIRequest):
     """
     context = {
         'pagename': 'Simple voting',
-        'menu': get_menu_context()
+        'menu': get_menu_context(),
+        "events": Event.objects.all()
     }
     return render(request, 'pages/start/index.html', context)
 
@@ -108,12 +109,14 @@ def event_edit_page(request: WSGIRequest, event_id: int):
 @login_required
 def commit_event_page(request, event_id):
     """
-    Добавляет пользователя в мероприятие
+        Добавляет пользователя в мероприятие
     """
-    context = {'pagename': 'Commit Event', 'menu': get_menu_context(), 'event_id': event_id}
-    event = Event.objects.get(pk=event_id)
+    try:
+        event = Event.objects.get(pk=event_id)
+    except Event.DoesNotExist:
+        return redirect('/')
     request.user.events.add(event)
-    return render(request, 'pages/start/index.html', context)
+    return redirect('/')
 
 
 def profile_view_page(request: WSGIRequest, code: int):
