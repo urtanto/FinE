@@ -15,4 +15,9 @@
 <a href="{% url 'register' %}">Зарегистрироваться</a>
 <p></p>
 <a href="{% url 'logout' %}">Выйти</a>
+<p></p>
+{% for event in events %}
+<a href="{% url 'event_commit' event_id=event.id%}">{{event.name}}</a>
+<p></p>
+{% endfor %}
 {% endblock %}
