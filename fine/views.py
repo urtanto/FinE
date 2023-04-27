@@ -5,12 +5,11 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
-from fine.forms import EditProfile, InterestsForm
 from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
-
+import json
 
 def get_menu_context():
     """
@@ -187,3 +186,76 @@ def edit_interests_page(request):
     context['form'] = form
 
     return render(request, 'pages/profile/edit_interests.html', context)
+
+
+def get_user(received_object: RegistrationEvents | Friends) -> User:
+    if isinstance(received_object, Friends):
+        return received_object.from_user
+    return received_object.user
+
+
+@login_required
+def event_page(request: WSGIRequest, event_id: int):
+    context = {
+        'pagename': 'Profile Editing',
+        'menu': get_menu_context(),
+    }
+    try:
+        event: Event = list(Event.objects.filter(id=int(event_id)))[0]
+        if request.method == 'POST':
+            print("*click*")
+            data = json.loads(request.body)
+            if data["going"]:
+                RegistrationEvents.objects.get(event=event, user=request.user).delete()
+            else:
+                RegistrationEvents.objects.create(event=event, user=request.user)
+        friends: list[Friends] = list(Friends.objects.filter(to_user=request.user, waiting=False))
+        people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=event_id))
+        friends: list[User] = list(map(get_user, friends))
+        people: list[User] = list(map(get_user, people))
+        event.description = "adada "
+        context['event'] = event
+        context['friends'] = friends
+        context['people'] = people
+        context['going'] = True if request.user in people else False
+    except IndexError:
+        return render(request, 'pages/does_not_found.html', context)
+    return render(request, 'pages/main/event.html', context)
+
+
+@login_required
+def friends_page(request):
+    """
+    Страница с друзьями пользователя
+    """
+    context = {
+        'pagename': 'Friends',
+        'menu': get_menu_context(),
+        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
+        'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
+        'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
+    }
+    context['friends_size'] = len(context['friends'])
+    context['friends_request_to_user_size'] = len(context['friends_request_to_user'])
+    context['friends_request_by_user_size'] = len(context['friends_request_by_user'])
+
+    if request.method == 'POST':
+        if request.POST.get('cancel_to_request'):
+            Friends.objects.get(id=request.POST.get('cancel_to_request')).delete()
+
+        if request.POST.get('accept_from_request'):
+            friend = Friends.objects.get(id=request.POST.get('accept_from_request'))
+            Friends.objects.create(to_user=friend.from_user, from_user=request.user, waiting=False)
+            Friends.objects.filter(id=request.POST.get('accept_from_request')).update(waiting=False)
+
+        if request.POST.get('cancel_from_request'):
+            Friends.objects.get(id=request.POST.get('cancel_from_request')).delete()
+
+        if request.POST.get('del_friend'):
+            friend = Friends.objects.get(id=request.POST.get('del_friend'))
+            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
+            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
+        return redirect('/friends/')
+
+    return render(request, 'pages/friends/friends.html', context)
