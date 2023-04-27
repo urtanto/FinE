@@ -5,7 +5,6 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm
-from fine.forms import RegistrationForm
 from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
