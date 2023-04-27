@@ -5,10 +5,13 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm
+from fine.forms import RegistrationForm
+from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
+import json
 
 
 def get_menu_context():
@@ -121,12 +124,38 @@ def profile_view_page(request: WSGIRequest, code: int):
         Interests.objects.filter(user=code).values_list('interest', flat=True)
         for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
             context['interests'].append(INTERESTS[i])
-
-
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
         raise Http404
+
+    try:
+        friend = Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code))
+        context['waiting_friend'] = friend.waiting
+
+    except Friends.DoesNotExist:
+        context['already_friend'] = False
+
+    try:
+        Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user, waiting=True)
+        context['have_request'] = True
+    except Friends.DoesNotExist:
+        context['have_request'] = False
+
+    if request.method == 'POST':
+        if request.POST.get('friend_button'):
+            Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
+        if request.POST.get('del_request'):
+            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+        if request.POST.get('del_friend'):
+            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+            Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
+        if request.POST.get('acp_friend'):
+            Friends.objects.create(to_user=User.objects.get(id=code), from_user=request.user, waiting=False)
+            Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(
+                waiting=False)
+
+        return redirect('/profile/' + str(code))
 
     return render(request, 'pages/profile/view.html', context)
 
