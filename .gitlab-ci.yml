@@ -5,12 +5,16 @@ stages: # List of stages for jobs, and their order of execution
   - style
 
 
-unit-test-job: # This job runs in the test stage.
+django-test-job: # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
+  before_script:
+    - pip install -r requirements.txt
   script:
-    - echo "Running unit tests..."
+    - python manage.py test
 
 pylint-job:
   stage: style
+  before_script:
+    - pip install -r requirements.txt
   script:
-    - echo "pylint moment"
+    - pylint .
