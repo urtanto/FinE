@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
 from fine.forms import EditProfile, InterestsForm
-from fine.forms import RegistrationForm
 from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
 from fine.models import RegistrationEvents, User, Interests, Event
