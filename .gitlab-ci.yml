@@ -7,6 +7,8 @@ stages: # List of stages for jobs, and their order of execution
 
 django-test-job: # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
+  before_script:
+    - pip install -r requirements.txt
   script:
     - python manage.py test
 
