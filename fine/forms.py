@@ -8,7 +8,7 @@ from django.forms import ModelForm
 
 class RegistrationForm(UserCreationForm):
     """
-    Форма регистрации
+    Форма регистрации пользователя.
     """
     email = forms.EmailField(required=True)
 
@@ -19,18 +19,24 @@ class RegistrationForm(UserCreationForm):
 
 class CreateEvent(ModelForm):
     """
-    Форма создания ивента
+    Форма создания ивента.
     """
     class Meta:
         model = Event
         fields = ['name', 'type', 'address', 'start_day', 'finish_day', 'description', 'entertainment_type']
 
 class EditProfile(forms.ModelForm):
+    """
+    Форма для изменения основных данных профиля пользователя.
+    """
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'avatar']
 
 class InterestsForm(forms.Form):
+    """
+    Форма для изменения интересов пользователя.
+    """
     OPTIONS = ((0, 'Спорт'),
         (1, 'Квесты'),
         (2, 'Видеоигры'),
