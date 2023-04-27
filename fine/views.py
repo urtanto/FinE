@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
+from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
 import json
@@ -38,7 +39,7 @@ def index_page(request: WSGIRequest):
 
 def registration_page(request: WSGIRequest):
     """
-    Страница регистрации
+    Страница регистрации пользователя.
     """
     context = {'pagename': 'Регистрация'}
     if request.method == 'POST':
@@ -57,19 +58,18 @@ def registration_page(request: WSGIRequest):
 
     return render(request, 'registration/register.html', context)
 
-
 INTERESTS = {
-    0: 'Спорт',
-    1: 'Квесты',
-    2: 'Видеоигры',
-    3: 'Фильмы'
+        0: 'Спорт',
+        1: 'Квесты',
+        2: 'Видеоигры',
+        3: 'Фильмы'
 }
 
 
 @login_required
 def event_create_page(request):
     """
-    Функция по созданию ивента
+    Страница с созданием ивента.
     """
     context = {'pagename': 'CreateEvent', 'menu': get_menu_context()}
     if request.method == 'POST':
@@ -95,7 +95,8 @@ def event_create_page(request):
 @login_required
 def event_edit_page(request: WSGIRequest, event_id: int):
     """
-    Функция по изменению ивента
+    Cтраница изменения ивента.
+    :param event_id: ID иваента.
     """
     context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
     event = Event.objects.get(pk=event_id)
@@ -121,9 +122,28 @@ def commit_event_page(request, event_id):
     return redirect('/')
 
 
+def friends_for_profile_view_page_algo(request: WSGIRequest, code: int):
+    """
+    Набор алгоритмов для страницы профиля.
+    :param request: Параметр запроса для POST-обработки.
+    :param code: ID пользователя.
+    """
+    if request.POST.get('button') == 'friend_button':
+        Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
+    elif request.POST.get('button') == 'del_request':
+        Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+    elif request.POST.get('button') == 'del_friend':
+        Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
+        Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
+    elif request.POST.get('button') == 'acp_friend':
+        Friends.objects.create(to_user=User.objects.get(id=code), from_user=request.user, waiting=False)
+        Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(waiting=False)
+
+
 def profile_view_page(request: WSGIRequest, code: int):
     """
-    Профиль пользователя
+    Страница профиля пользователя.
+    :param code: ID пользователя.
     """
     context = {'pagename': 'Profile',
                'menu': get_menu_context(),
@@ -141,33 +161,25 @@ def profile_view_page(request: WSGIRequest, code: int):
         context['interests'] = None
         raise Http404
 
-    try:
-        friend = Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code))
-        context['waiting_friend'] = friend.waiting
+    if request.user.is_authenticated:
+        try:
+            friend = Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code))
+            context['waiting_friend'] = friend.waiting
 
-    except Friends.DoesNotExist:
-        context['already_friend'] = False
+        except Friends.DoesNotExist:
+            context['already_friend'] = False
+        try:
+            Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user, waiting=True)
+            context['have_request'] = True
+        except Friends.DoesNotExist:
+            context['have_request'] = False
 
-    try:
-        Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user, waiting=True)
-        context['have_request'] = True
-    except Friends.DoesNotExist:
-        context['have_request'] = False
 
     if request.method == 'POST':
-        if request.POST.get('friend_button'):
-            Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
-        if request.POST.get('del_request'):
-            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
-        if request.POST.get('del_friend'):
-            Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code)).delete()
-            Friends.objects.get(from_user=User.objects.get(id=code), to_user=request.user).delete()
-        if request.POST.get('acp_friend'):
-            Friends.objects.create(to_user=User.objects.get(id=code), from_user=request.user, waiting=False)
-            Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(
-                waiting=False)
+        friends_for_profile_view_page_algo(request, code)
 
         return redirect('/profile/' + str(code))
+
 
     return render(request, 'pages/profile/view.html', context)
 
@@ -175,7 +187,7 @@ def profile_view_page(request: WSGIRequest, code: int):
 @login_required
 def edit_page(request):
     """
-    Редактирование Профиля
+    Страница редактирования основной информации профиля.
     """
     context = {
         'pagename': 'Profile Editing',
@@ -197,6 +209,12 @@ def edit_page(request):
 
 
 def to_fit(arr, size, request):
+    """
+    Функция для возвращения размера массива 'Интересов' к параметру :size.
+    :param arr: Массив интересов
+    :param size: Размер массива
+    :param request: Параметр запроса для POST-обработки
+    """
     if len(arr) > size:
         for i in range(len(arr) - size):
             arr[i].delete()
@@ -207,6 +225,9 @@ def to_fit(arr, size, request):
 
 @login_required
 def edit_interests_page(request):
+    """
+    Страница с редактированием интересов пользователя.
+    """
     context = {
         'pagename': 'Profile Editing',
         'menu': get_menu_context(),
@@ -232,6 +253,29 @@ def edit_interests_page(request):
     context['form'] = form
 
     return render(request, 'pages/profile/edit_interests.html', context)
+
+
+def friends_algo(request: WSGIRequest):
+    """
+    Набор алгоритмов для страницы с дрзьями.
+    :param request: Параметр запроса для POST-обработки
+    """
+    if request.POST.get('cancel_to_request'):
+        Friends.objects.get(id=request.POST.get('cancel_to_request')).delete()
+
+    if request.POST.get('accept_from_request'):
+        friend = Friends.objects.get(id=request.POST.get('accept_from_request'))
+        Friends.objects.create(to_user=friend.from_user, from_user=request.user, waiting=False)
+        Friends.objects.filter(id=request.POST.get('accept_from_request')).update(waiting=False)
+
+    if request.POST.get('cancel_from_request'):
+        Friends.objects.get(id=request.POST.get('cancel_from_request')).delete()
+
+    if request.POST.get('del_friend'):
+        friend = Friends.objects.get(id=request.POST.get('del_friend'))
+        Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
+        Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
 
 
 def get_user(received_object: RegistrationEvents | Friends) -> User:
@@ -286,21 +330,7 @@ def friends_page(request):
     context['friends_request_by_user_size'] = len(context['friends_request_by_user'])
 
     if request.method == 'POST':
-        if request.POST.get('cancel_to_request'):
-            Friends.objects.get(id=request.POST.get('cancel_to_request')).delete()
-
-        if request.POST.get('accept_from_request'):
-            friend = Friends.objects.get(id=request.POST.get('accept_from_request'))
-            Friends.objects.create(to_user=friend.from_user, from_user=request.user, waiting=False)
-            Friends.objects.filter(id=request.POST.get('accept_from_request')).update(waiting=False)
-
-        if request.POST.get('cancel_from_request'):
-            Friends.objects.get(id=request.POST.get('cancel_from_request')).delete()
-
-        if request.POST.get('del_friend'):
-            friend = Friends.objects.get(id=request.POST.get('del_friend'))
-            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
-            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+        friends_algo(request)
 
         return redirect('/friends/')
 
