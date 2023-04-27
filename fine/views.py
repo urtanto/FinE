@@ -4,10 +4,9 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from fine.forms import EditProfile, InterestsForm
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Friends
 from django.contrib.auth.decorators import login_required
-from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
 import json
@@ -31,7 +30,8 @@ def index_page(request: WSGIRequest):
     """
     context = {
         'pagename': 'Simple voting',
-        'menu': get_menu_context()
+        'menu': get_menu_context(),
+        "events": Event.objects.all()
     }
     return render(request, 'pages/start/index.html', context)
 
@@ -106,6 +106,19 @@ def event_edit_page(request: WSGIRequest, event_id: int):
             form.save()
     context['form'] = form
     return render(request, 'pages/event/edit.html', context)
+
+
+@login_required
+def commit_event_page(request, event_id):
+    """
+        Добавляет пользователя в мероприятие
+    """
+    try:
+        event = Event.objects.get(pk=event_id)
+    except Event.DoesNotExist:
+        return redirect('/')
+    request.user.events.add(event)
+    return redirect('/')
 
 
 def profile_view_page(request: WSGIRequest, code: int):
