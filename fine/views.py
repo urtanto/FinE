@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
 from django.contrib.auth.hashers import make_password, check_password
+import json
 
 
 def get_menu_context():
@@ -57,12 +58,11 @@ def registration_page(request: WSGIRequest):
 
     return render(request, 'registration/register.html', context)
 
-
 INTERESTS = {
-    0: 'Спорт',
-    1: 'Квесты',
-    2: 'Видеоигры',
-    3: 'Фильмы'
+        0: 'Спорт',
+        1: 'Квесты',
+        2: 'Видеоигры',
+        3: 'Фильмы'
 }
 
 
@@ -161,10 +161,12 @@ def profile_view_page(request: WSGIRequest, code: int):
         except Friends.DoesNotExist:
             context['have_request'] = False
 
+
     if request.method == 'POST':
         friends_for_profile_view_page_algo(request, code)
 
         return redirect('/profile/' + str(code))
+
 
     return render(request, 'pages/profile/view.html', context)
 
@@ -260,6 +262,42 @@ def friends_algo(request: WSGIRequest):
         friend = Friends.objects.get(id=request.POST.get('del_friend'))
         Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
         Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
+
+
+def get_user(received_object: RegistrationEvents | Friends) -> User:
+    if isinstance(received_object, Friends):
+        return received_object.from_user
+    return received_object.user
+
+
+@login_required
+def event_page(request: WSGIRequest, event_id: int):
+    context = {
+        'pagename': 'Profile Editing',
+        'menu': get_menu_context(),
+    }
+    try:
+        event: Event = list(Event.objects.filter(id=int(event_id)))[0]
+        if request.method == 'POST':
+            print("*click*")
+            data = json.loads(request.body)
+            if data["going"]:
+                RegistrationEvents.objects.get(event=event, user=request.user).delete()
+            else:
+                RegistrationEvents.objects.create(event=event, user=request.user)
+        friends: list[Friends] = list(Friends.objects.filter(to_user=request.user, waiting=False))
+        people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=event_id))
+        friends: list[User] = list(map(get_user, friends))
+        people: list[User] = list(map(get_user, people))
+        event.description = "adada "
+        context['event'] = event
+        context['friends'] = friends
+        context['people'] = people
+        context['going'] = True if request.user in people else False
+    except IndexError:
+        return render(request, 'pages/does_not_found.html', context)
+    return render(request, 'pages/main/event.html', context)
 
 
 @login_required
