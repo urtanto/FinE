@@ -3,11 +3,9 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
-from fine.models import RegistrationEvents, User, Interests, Friends
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
 from django.contrib.auth.decorators import login_required
-from fine.forms import RegistrationForm, CreateEvent
-from fine.models import RegistrationEvents, User, Interests, Event
+from fine.models import RegistrationEvents, User, Interests, Event, Friends
 from django.contrib.auth.hashers import make_password, check_password
 import json
 
@@ -310,6 +308,23 @@ def event_page(request: WSGIRequest, event_id: int):
     except IndexError:
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
+
+
+@login_required
+def search_friends(request):
+    context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': ''}
+    if request.method == 'POST':
+        form = SearchFriends(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            users = User.objects.filter(first_name__icontains=text)
+            context['users'] = users
+        else:
+            form = SearchFriends()
+    else:
+        form = SearchFriends()
+    context['form'] = form
+    return render(request, 'pages/friends/search_friends.html', context)
 
 
 @login_required

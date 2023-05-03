@@ -1,0 +1,15 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <form method="post" action="{% url 'search_friends' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary float-right btn-block">искать</button>
+    </form>
+    {% for user in users %}
+        <h1>{{user.first_name}}</h1>
+        <p></p>
+
+    {% endfor %}
+
+
+{% endblock %}

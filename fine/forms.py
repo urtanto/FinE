@@ -36,6 +36,10 @@ class EditProfile(forms.ModelForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'avatar']
 
 
+class SearchFriends(forms.Form):
+    text = forms.CharField(max_length=255)
+
+
 class InterestsForm(forms.Form):
     """
     Форма для изменения интересов пользователя.
