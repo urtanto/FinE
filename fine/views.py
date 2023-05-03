@@ -59,10 +59,10 @@ def registration_page(request: WSGIRequest):
 
 
 INTERESTS = {
-        0: 'Спорт',
-        1: 'Квесты',
-        2: 'Видеоигры',
-        3: 'Фильмы'
+    0: 'Спорт',
+    1: 'Квесты',
+    2: 'Видеоигры',
+    3: 'Фильмы'
 }
 
 
@@ -147,7 +147,7 @@ def profile_view_page(request: WSGIRequest, code: int):
     """
     context = {'pagename': 'Profile',
                'menu': get_menu_context(),
-               'cur_user': request.user }
+               'cur_user': request.user}
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
@@ -176,12 +176,10 @@ def profile_view_page(request: WSGIRequest, code: int):
         except Friends.DoesNotExist:
             context['have_request'] = False
 
-
     if request.method == 'POST':
         friends_for_profile_view_page_algo(request, code)
 
         return redirect('/profile/' + str(code))
-
 
     return render(request, 'pages/profile/view.html', context)
 
@@ -277,7 +275,6 @@ def friends_algo(request: WSGIRequest):
         friend = Friends.objects.get(id=request.POST.get('del_friend'))
         Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
         Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
-
 
 
 def get_user(received_object: RegistrationEvents | Friends) -> User:
