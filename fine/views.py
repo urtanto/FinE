@@ -312,15 +312,16 @@ def event_page(request: WSGIRequest, event_id: int):
 
 @login_required
 def search_friends(request):
-    context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': ''}
+    context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': User.objects.all(), 'users_size': 0}
     if request.method == 'POST':
         form = SearchFriends(request.POST)
         if form.is_valid():
-            text = form.cleaned_data['text']
-            users = User.objects.filter(first_name__icontains=text)
+            search = form.cleaned_data['search']
+            users = User.objects.filter(first_name__icontains=search)
             context['users'] = users
+            context['users_size'] = len(users)
         else:
-            form = SearchFriends()
+            pass
     else:
         form = SearchFriends()
     context['form'] = form

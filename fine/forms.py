@@ -37,7 +37,7 @@ class EditProfile(forms.ModelForm):
 
 
 class SearchFriends(forms.Form):
-    text = forms.CharField(max_length=255)
+    search = forms.CharField(max_length=255)
 
 
 class InterestsForm(forms.Form):
