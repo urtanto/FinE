@@ -57,11 +57,12 @@ def registration_page(request: WSGIRequest):
 
     return render(request, 'registration/register.html', context)
 
+
 INTERESTS = {
-        0: 'Спорт',
-        1: 'Квесты',
-        2: 'Видеоигры',
-        3: 'Фильмы'
+    0: 'Спорт',
+    1: 'Квесты',
+    2: 'Видеоигры',
+    3: 'Фильмы'
 }
 
 
@@ -183,12 +184,10 @@ def profile_view_page(request: WSGIRequest, code: int):
         except Friends.DoesNotExist:
             context['have_request'] = False
 
-
     if request.method == 'POST':
         friends_for_profile_view_page_algo(request, code)
 
         return redirect('/profile/' + str(code))
-
 
     return render(request, 'pages/profile/view.html', context)
 
@@ -287,7 +286,6 @@ def friends_algo(request: WSGIRequest):
         Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
 
 
-
 def get_user(received_object: RegistrationEvents | Friends) -> User:
     if isinstance(received_object, Friends):
         return received_object.from_user
@@ -322,13 +320,15 @@ def event_page(request: WSGIRequest, event_id: int):
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
 
-def get_friends(id : int):
+
+def get_friends(id: int):
     """
     Функция, возвращающая список друзей пользователя.
     :param id: ID пользователя
     :return: Список друзей
     """
     return Friends.objects.filter(to_user=User.objects.get(id=id), waiting=False)
+
 
 @login_required
 def friends_page(request):
@@ -353,6 +353,7 @@ def friends_page(request):
 
     return render(request, 'pages/friends/friends.html', context)
 
+
 @login_required
 def create_group_page(request):
     context = {
@@ -363,9 +364,8 @@ def create_group_page(request):
     if request.method == 'POST':
         form = CreateGroup(request.POST)
         if form.is_valid():
-            UserGroups.objects.create(title=form.cleaned_data['title'], description=form.cleaned_data['description'], founder=request.user)
-
-            #request.user.members.add(a) # добавить пользователя в группу a
+            UserGroups.objects.create(title=form.cleaned_data['title'], description=form.cleaned_data['description'],
+                                      founder=request.user)
 
             return redirect('/')
     else:
@@ -374,13 +374,48 @@ def create_group_page(request):
 
     return render(request, 'pages/groups/create_group.html', context)
 
+
 @login_required
 def groups_page(request):
     context = {
         'pagename': 'Groups',
         'menu': get_menu_context(),
-        'groups': request.user.members.all(), # группы, где пользователь состоит
-        'my_groups': UserGroups.objects.filter(founder=request.user) # группы, которыми владеет пользователь
+        'groups': request.user.members.all(),  # группы, где пользователь состоит
+        'my_groups': UserGroups.objects.filter(founder=request.user)  # группы, которыми владеет пользователь
     }
 
     return render(request, 'pages/groups/groups.html', context)
+
+
+@login_required
+def group_page(request, group_id: int):
+    context = {
+        'pagename': 'Group №' + str(group_id),
+        'menu': get_menu_context(),
+        'group': UserGroups.objects.get(id=group_id),
+        'users': User.objects.filter(members__id=group_id)
+    }
+    if UserGroups.objects.get(
+            id=group_id).founder.id is not request.user.id and group_id not in request.user.members.all().values_list(
+            'id', flat=True):
+        return redirect('/')
+
+    return render(request, 'pages/groups/group.html', context)
+
+
+@login_required
+def add_to_group_page(request, group_id: int):
+    context = {
+        'pagename': 'Adding to Group №' + str(group_id),
+        'menu': get_menu_context(),
+        'group': UserGroups.objects.get(id=group_id),
+        'users': User.objects.filter(members__id=group_id)
+    }
+
+    if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
+        redirect('/')
+
+    # invented = User.objects.get(id=1)
+    # invented.members.add(context['group'])
+
+    return render(request, 'pages/groups/add_to_group.html', context)

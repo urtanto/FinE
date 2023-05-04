@@ -44,7 +44,9 @@ urlpatterns = [
     path('menu/event/<int:event_id>', views.event_page, name='event'),
     path('friends/', views.friends_page, name='friends'),
     path('create_group/', views.create_group_page, name='create_group'),
-    path('groups/', views.groups_page, name='groups')
+    path('groups/', views.groups_page, name='groups'),
+    path('group/<int:group_id>', views.group_page, name='group'),
+    path('group/add_to_group/<int:group_id>', views.add_to_group_page, name='add_to_group')
 ]
 
 if settings.DEBUG:
