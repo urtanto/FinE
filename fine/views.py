@@ -312,20 +312,70 @@ def event_page(request: WSGIRequest, event_id: int):
 
 @login_required
 def search_friends(request):
+    """
+    Страница по поиску людей
+    """
     context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': User.objects.all(), 'users_size': 0}
     if request.method == 'POST':
         form = SearchFriends(request.POST)
         if form.is_valid():
             search = form.cleaned_data['search']
-            users = User.objects.filter(first_name__icontains=search)
+            friends = Friends.objects.filter(waiting=1, from_user_id=request.user)
+            friends_id = [int(friend.to_user_id) for friend in friends]
+            if len(friends_id) == 0:
+                users = User.objects.filter(first_name__icontains=search) & User.objects.exclude(id=request.user.id)
+            else:
+                users = User.objects.filter(first_name__icontains=search) & User.objects.exclude(
+                    id=request.user.id) & User.objects.exclude(id=friends_id)
             context['users'] = users
             context['users_size'] = len(users)
+
         else:
             pass
     else:
         form = SearchFriends()
+    if request.POST.get('friend_button'):
+        Friends.objects.create(from_user=request.user,
+                               to_user=User.objects.get(id=request.POST.get('friend_button')), waiting=True)
+
     context['form'] = form
     return render(request, 'pages/friends/search_friends.html', context)
+
+
+def friends_only_page(request):
+    """
+    Страница с друзьями пользователя
+    """
+    context = {
+        'pagename': 'Friends',
+        'menu': get_menu_context(),
+        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
+        'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
+        'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
+    }
+    context['friends_size'] = len(context['friends'])
+
+
+    if request.method == 'POST':
+        if request.POST.get('cancel_to_request'):
+            Friends.objects.get(id=request.POST.get('cancel_to_request')).delete()
+
+        if request.POST.get('accept_from_request'):
+            friend = Friends.objects.get(id=request.POST.get('accept_from_request'))
+            Friends.objects.create(to_user=friend.from_user, from_user=request.user, waiting=False)
+            Friends.objects.filter(id=request.POST.get('accept_from_request')).update(waiting=False)
+
+        if request.POST.get('cancel_from_request'):
+            Friends.objects.get(id=request.POST.get('cancel_from_request')).delete()
+
+        if request.POST.get('del_friend'):
+            friend = Friends.objects.get(id=request.POST.get('del_friend'))
+            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
+            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
+        return redirect('/friends_only/')
+
+    return render(request, 'pages/friends/friends_only_page.html', context)
 
 
 @login_required

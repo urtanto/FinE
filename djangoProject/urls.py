@@ -44,6 +44,7 @@ urlpatterns = [
     path('menu/event/<int:event_id>', views.event_page, name='event'),
     path('friends/', views.friends_page, name='friends'),
     path('search_friends/', views.search_friends, name='search_friends'),
+    path('friends_only/', views.friends_only_page, name='friends_only'),
 ]
 
 if settings.DEBUG:
