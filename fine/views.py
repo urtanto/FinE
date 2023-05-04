@@ -3,8 +3,8 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
 
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent
-from fine.models import RegistrationEvents, User, Interests, Friends
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, CreateGroup
+from fine.models import RegistrationEvents, User, Interests, Friends, UserGroups
 from django.contrib.auth.decorators import login_required
 from fine.forms import RegistrationForm, CreateEvent
 from fine.models import RegistrationEvents, User, Interests, Event
@@ -19,17 +19,17 @@ def get_menu_context():
     :return: контекст меню
     """
     return [
-        {'url_name': 'index', 'name': 'Меню'},
-        {'url_name': 'index', 'name': 'Мои голосования'},
+        {'url_name': 'index', 'name': 'Menu'},
+        {'url_name': 'event_create', 'name': 'Organize event'}
     ]
 
 
 def index_page(request: WSGIRequest):
     """
-    Функция обрабатывающая запрос /
+    Функция, обрабатывающая запрос.
     """
     context = {
-        'pagename': 'Simple voting',
+        'pagename': 'FinE',
         'menu': get_menu_context(),
         "events": Event.objects.all()
     }
@@ -95,7 +95,9 @@ def event_create_page(request):
 def event_edit_page(request: WSGIRequest, event_id: int):
     """
     Cтраница изменения ивента.
-    :param event_id: ID иваента.
+
+    :param event_id: Event ID
+    :type event_id: int
     """
     context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
     event = Event.objects.get(pk=event_id)
@@ -111,7 +113,10 @@ def event_edit_page(request: WSGIRequest, event_id: int):
 @login_required
 def commit_event_page(request, event_id):
     """
-        Добавляет пользователя в мероприятие
+    Страница с добавлением пользователя на мероприятие.
+
+    :param event_id: Event ID
+    :type event_id: int
     """
     try:
         event = Event.objects.get(pk=event_id)
@@ -124,8 +129,11 @@ def commit_event_page(request, event_id):
 def friends_for_profile_view_page_algo(request: WSGIRequest, code: int):
     """
     Набор алгоритмов для страницы профиля.
+
     :param request: Параметр запроса для POST-обработки.
+    :type request: :class: 'django.http.HttpRequest'
     :param code: ID пользователя.
+    :type event_id: int
     """
     if request.POST.get('button') == 'friend_button':
         Friends.objects.create(from_user=request.user, to_user=User.objects.get(id=code), waiting=True)
@@ -142,7 +150,9 @@ def friends_for_profile_view_page_algo(request: WSGIRequest, code: int):
 def profile_view_page(request: WSGIRequest, code: int):
     """
     Страница профиля пользователя.
-    :param code: ID пользователя.
+
+    :param code: ID пользователя
+    :type code: int
     """
     context = {'pagename': 'Profile',
                'menu': get_menu_context(),
@@ -210,9 +220,10 @@ def edit_page(request):
 def to_fit(arr, size, request):
     """
     Функция для возвращения размера массива 'Интересов' к параметру :size.
-    :param arr: Массив интересов
-    :param size: Размер массива
-    :param request: Параметр запроса для POST-обработки
+    
+    :param arr: Массив интересов.
+    :param size: Размер будущего массива.
+    :param request: Параметр запроса для POST-обработки.
     """
     if len(arr) > size:
         for i in range(len(arr) - size):
@@ -311,6 +322,13 @@ def event_page(request: WSGIRequest, event_id: int):
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
 
+def get_friends(id : int):
+    """
+    Функция, возвращающая список друзей пользователя.
+    :param id: ID пользователя
+    :return: Список друзей
+    """
+    return Friends.objects.filter(to_user=User.objects.get(id=id), waiting=False)
 
 @login_required
 def friends_page(request):
@@ -320,7 +338,7 @@ def friends_page(request):
     context = {
         'pagename': 'Friends',
         'menu': get_menu_context(),
-        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
+        'friends': get_friends(request.user.id),
         'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
         'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
     }
@@ -334,3 +352,35 @@ def friends_page(request):
         return redirect('/friends/')
 
     return render(request, 'pages/friends/friends.html', context)
+
+@login_required
+def create_group_page(request):
+    context = {
+        'pagename': 'Create Group',
+        'menu': get_menu_context(),
+    }
+
+    if request.method == 'POST':
+        form = CreateGroup(request.POST)
+        if form.is_valid():
+            UserGroups.objects.create(title=form.cleaned_data['title'], description=form.cleaned_data['description'], founder=request.user)
+
+            #request.user.members.add(a) # добавить пользователя в группу a
+
+            return redirect('/')
+    else:
+        form = CreateGroup()
+    context['form'] = form
+
+    return render(request, 'pages/groups/create_group.html', context)
+
+@login_required
+def groups_page(request):
+    context = {
+        'pagename': 'Groups',
+        'menu': get_menu_context(),
+        'groups': request.user.members.all(), # группы, где пользователь состоит
+        'my_groups': UserGroups.objects.filter(founder=request.user) # группы, которыми владеет пользователь
+    }
+
+    return render(request, 'pages/groups/groups.html', context)

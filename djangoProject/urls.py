@@ -42,7 +42,9 @@ urlpatterns = [
     path('profile/edit/about', views.edit_page, name='edition_about'),
     path('profile/edit/interests', views.edit_interests_page, name='edition_interests'),
     path('menu/event/<int:event_id>', views.event_page, name='event'),
-    path('friends/', views.friends_page, name='friends')
+    path('friends/', views.friends_page, name='friends'),
+    path('create_group/', views.create_group_page, name='create_group'),
+    path('groups/', views.groups_page, name='groups')
 ]
 
 if settings.DEBUG:

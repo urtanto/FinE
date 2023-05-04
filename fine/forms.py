@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import FileInput, TextInput
 
-from fine.models import User, Event
+from fine.models import User, Event, UserGroups
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
 
@@ -44,3 +44,7 @@ class InterestsForm(forms.Form):
 
     Interests = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                           choices=OPTIONS)
+
+class CreateGroup(forms.Form):
+    title = forms.CharField(max_length=15)
+    description = forms.CharField(max_length=255)

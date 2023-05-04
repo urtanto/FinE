@@ -1,0 +1,17 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<form method='post'>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type='submit' class="btn btn-primary btn-lg" value='submit'>Сохранить изменения</button>
+</form>
+
+{% endblock %}

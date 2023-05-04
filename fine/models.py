@@ -70,3 +70,9 @@ class Friends(models.Model):
     from_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='who_send')
     to_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='who_receive')
     waiting = models.BooleanField()
+
+class UserGroups(models.Model):
+    title = models.CharField(max_length=15)
+    description = models.CharField(max_length=255)
+    founder = models.ForeignKey(get_user_model(), models.CASCADE, related_name='founder')
+    members = models.ManyToManyField(get_user_model(), related_name='members')
