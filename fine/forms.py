@@ -21,9 +21,11 @@ class CreateEvent(ModelForm):
     """
     Форма создания ивента.
     """
+
     class Meta:
         model = Event
         fields = ['name', 'type', 'address', 'start_day', 'finish_day', 'description', 'entertainment_type']
+
 
 class EditProfile(forms.ModelForm):
     """
@@ -33,14 +35,19 @@ class EditProfile(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'avatar']
 
+
+class SearchFriends(forms.Form):
+    search = forms.CharField(max_length=255)
+
+
 class InterestsForm(forms.Form):
     """
     Форма для изменения интересов пользователя.
     """
     OPTIONS = ((0, 'Спорт'),
-        (1, 'Квесты'),
-        (2, 'Видеоигры'),
-        (3, 'Фильмы'))
+               (1, 'Квесты'),
+               (2, 'Видеоигры'),
+               (3, 'Фильмы'))
 
     Interests = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                           choices=OPTIONS)

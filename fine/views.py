@@ -5,9 +5,9 @@ from django.shortcuts import render, redirect
 
 from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, CreateGroup
 from fine.models import RegistrationEvents, User, Interests, Friends, UserGroups
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
 from django.contrib.auth.decorators import login_required
-from fine.forms import RegistrationForm, CreateEvent
-from fine.models import RegistrationEvents, User, Interests, Event
+from fine.models import RegistrationEvents, User, Interests, Event, Friends
 from django.contrib.auth.hashers import make_password, check_password
 import json
 
@@ -19,8 +19,8 @@ def get_menu_context():
     :return: контекст меню
     """
     return [
-        {'url_name': 'index', 'name': 'Menu'},
-        {'url_name': 'event_create', 'name': 'Organize event'}
+        {'url_name': 'index', 'name': 'Меню'},
+        {'url_name': 'index', 'name': 'Главная страница'},
     ]
 
 
@@ -166,6 +166,8 @@ def profile_view_page(request: WSGIRequest, code: int):
         Interests.objects.filter(user=code).values_list('interest', flat=True)
         for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
             context['interests'].append(INTERESTS[i])
+
+
     except User.DoesNotExist:
         context['events'] = None
         context['interests'] = None
@@ -219,7 +221,7 @@ def edit_page(request):
 def to_fit(arr, size, request):
     """
     Функция для возвращения размера массива 'Интересов' к параметру :size.
-    
+
     :param arr: Массив интересов.
     :param size: Размер будущего массива.
     :param request: Параметр запроса для POST-обработки.
@@ -286,6 +288,7 @@ def friends_algo(request: WSGIRequest):
         Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
 
 
+
 def get_user(received_object: RegistrationEvents | Friends) -> User:
     if isinstance(received_object, Friends):
         return received_object.from_user
@@ -328,6 +331,65 @@ def get_friends(id: int):
     :return: Список друзей
     """
     return Friends.objects.filter(to_user=User.objects.get(id=id), waiting=False)
+
+
+@login_required
+def search_friends(request):
+    """
+    Страница по поиску людей
+    """
+    context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': User.objects.all(), 'users_size': 0}
+    if request.method == 'POST':
+        form = SearchFriends(request.POST)
+        if form.is_valid():
+            search = form.cleaned_data['search']
+            friends = Friends.objects.filter(from_user_id=request.user)
+            friends_id = [friend.to_user_id for friend in friends]
+
+            users_search = (User.objects.filter(first_name__icontains=search) |
+                            User.objects.filter(last_name__icontains=search) |
+                            User.objects.filter(username__icontains=search))
+
+            my_user = User.objects.exclude(id=request.user.id)
+
+            users_friends = User.objects.exclude(id__in=friends_id)
+
+            users = users_search & my_user & users_friends
+            context['users'] = users
+            context['users_size'] = len(users)
+        else:
+            pass
+    else:
+        form = SearchFriends()
+
+    if request.POST.get('friend_button'):
+        Friends.objects.create(from_user=request.user,
+                               to_user=User.objects.get(id=request.POST.get('friend_button')), waiting=True)
+
+    context['form'] = form
+    return render(request, 'pages/friends/search_friends.html', context)
+
+
+def friends_only_page(request):
+    """
+    Страница только с друзьями пользователя
+    """
+    context = {
+        'pagename': 'Friends',
+        'menu': get_menu_context(),
+        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
+    }
+    context['friends_size'] = len(context['friends'])
+
+    if request.method == 'POST':
+        if request.POST.get('del_friend'):
+            friend = Friends.objects.get(id=request.POST.get('del_friend'))
+            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
+            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
+
+        return redirect('/friends_only/')
+
+    return render(request, 'pages/friends/friends_only_page.html', context)
 
 
 @login_required
