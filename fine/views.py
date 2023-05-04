@@ -321,12 +321,12 @@ def search_friends(request):
         if form.is_valid():
             search = form.cleaned_data['search']
             friends = Friends.objects.filter(waiting=1, from_user_id=request.user)
-            friends_id = [int(friend.to_user_id) for friend in friends]
+            friends_id = [friend.to_user_id for friend in friends]
             if len(friends_id) == 0:
                 users = User.objects.filter(first_name__icontains=search) & User.objects.exclude(id=request.user.id)
             else:
                 users = User.objects.filter(first_name__icontains=search) & User.objects.exclude(
-                    id=request.user.id) & User.objects.exclude(id=friends_id)
+                    id=request.user.id) & User.objects.exclude(id__in=friends_id)
             context['users'] = users
             context['users_size'] = len(users)
 
