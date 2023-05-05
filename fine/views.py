@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
 from django.contrib.auth.decorators import login_required
@@ -10,16 +11,39 @@ from django.contrib.auth.hashers import make_password, check_password
 import json
 
 
-def get_menu_context():
+def get_menu_context(request: WSGIRequest = None):
     """
     Функция для возвращения контекста меню
 
     :return: контекст меню
     """
-    return [
-        {'url_name': 'index', 'name': 'Меню'},
-        {'url_name': 'index', 'name': 'Главная страница'},
-    ]
+    data = {
+        "left": {
+            "unauthorized": {
+                {'url_name': 'index', 'name': 'Меню'},
+                {'url_name': 'index', 'name': 'Главная страница'},
+            },
+        },
+        "right": {
+            "unauthorized": {
+                {'url_name': 'register', 'name': 'Зарегистрироваться'},
+                {'url_name': 'login', 'name': 'Войти', "button-style": "btn-outline-primary"},
+            },
+        },
+    }
+    if not request:
+        return data
+    print(reverse("index"))
+    data["left"]["authorized"] = {
+                {'url_name': 'index', 'name': 'Меню'},
+                {'url_name': 'index', 'name': 'Главная страница'},
+                {'url_name': 'friends', 'name': 'Друзья'},
+            }
+    data["right"]["authorized"] = {
+                {'url_name': 'profile', 'name': 'Профиль', "need_id": True},
+                {'url_name': 'logout', 'name': 'Выйти', "need_separator": True},
+            }
+    return data
 
 
 def index_page(request: WSGIRequest):
@@ -28,7 +52,7 @@ def index_page(request: WSGIRequest):
     """
     context = {
         'pagename': 'Simple voting',
-        'menu': get_menu_context(),
+        'menu': get_menu_context(request),
         "events": Event.objects.all()
     }
     return render(request, 'pages/start/index.html', context)
@@ -65,11 +89,11 @@ INTERESTS = {
 
 
 @login_required
-def event_create_page(request):
+def event_create_page(request: WSGIRequest):
     """
     Страница с созданием ивента.
     """
-    context = {'pagename': 'CreateEvent', 'menu': get_menu_context()}
+    context = {'pagename': 'CreateEvent', 'menu': get_menu_context(request)}
     if request.method == 'POST':
         form = CreateEvent(request.POST)
         if form.is_valid():
@@ -96,7 +120,7 @@ def event_edit_page(request: WSGIRequest, event_id: int):
     Cтраница изменения ивента.
     :param event_id: ID иваента.
     """
-    context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
+    context = {'pagename': 'EditEvent', 'menu': get_menu_context(request), 'event_id': event_id}
     event = Event.objects.get(pk=event_id)
     form = CreateEvent(instance=event)
     if request.method == 'POST':
@@ -144,7 +168,7 @@ def profile_view_page(request: WSGIRequest, code: int):
     :param code: ID пользователя.
     """
     context = {'pagename': 'Profile',
-               'menu': get_menu_context(),
+               'menu': get_menu_context(request),
                'cur_user': request.user}
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
@@ -183,13 +207,13 @@ def profile_view_page(request: WSGIRequest, code: int):
 
 
 @login_required
-def edit_page(request):
+def edit_page(request: WSGIRequest):
     """
     Страница редактирования основной информации профиля.
     """
     context = {
         'pagename': 'Profile Editing',
-        'menu': get_menu_context(),
+        'menu': get_menu_context(request),
         'user': request.user
     }
 
@@ -222,13 +246,13 @@ def to_fit(arr, size, request):
 
 
 @login_required
-def edit_interests_page(request):
+def edit_interests_page(request: WSGIRequest):
     """
     Страница с редактированием интересов пользователя.
     """
     context = {
         'pagename': 'Profile Editing',
-        'menu': get_menu_context(),
+        'menu': get_menu_context(request),
     }
     if request.method == 'POST':
         form = InterestsForm(request.POST)
@@ -285,7 +309,7 @@ def get_user(received_object: RegistrationEvents | Friends) -> User:
 def event_page(request: WSGIRequest, event_id: int):
     context = {
         'pagename': 'Profile Editing',
-        'menu': get_menu_context(),
+        'menu': get_menu_context(request),
     }
     try:
         event: Event = list(Event.objects.filter(id=int(event_id)))[0]
@@ -315,7 +339,7 @@ def search_friends(request):
     """
     Страница по поиску людей
     """
-    context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': User.objects.all(), 'users_size': 0}
+    context = {'pagename': 'Search friends', 'menu': get_menu_context(request), 'users': User.objects.all(), 'users_size': 0}
     if request.method == 'POST':
         form = SearchFriends(request.POST)
         if form.is_valid():
@@ -353,7 +377,7 @@ def friends_only_page(request):
     """
     context = {
         'pagename': 'Friends',
-        'menu': get_menu_context(),
+        'menu': get_menu_context(request),
         'friends': Friends.objects.filter(to_user=request.user, waiting=False),
     }
     context['friends_size'] = len(context['friends'])
@@ -370,13 +394,13 @@ def friends_only_page(request):
 
 
 @login_required
-def friends_page(request):
+def friends_page(request: WSGIRequest):
     """
     Страница с друзьями пользователя
     """
     context = {
         'pagename': 'Friends',
-        'menu': get_menu_context(),
+        'menu': get_menu_context(request),
         'friends': Friends.objects.filter(to_user=request.user, waiting=False),
         'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
         'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
