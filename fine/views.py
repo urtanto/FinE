@@ -288,7 +288,6 @@ def friends_algo(request: WSGIRequest):
         Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
 
 
-
 def get_user(received_object: RegistrationEvents | Friends) -> User:
     if isinstance(received_object, Friends):
         return received_object.from_user
@@ -459,7 +458,7 @@ def group_page(request, group_id: int):
     }
     if UserGroups.objects.get(
             id=group_id).founder.id is not request.user.id and group_id not in request.user.members.all().values_list(
-            'id', flat=True):
+        'id', flat=True):
         return redirect('/')
 
     return render(request, 'pages/groups/group.html', context)
@@ -471,30 +470,49 @@ def add_to_group_page(request, group_id: int):
         'pagename': 'Adding to Group №' + str(group_id),
         'menu': get_menu_context(),
         'group': UserGroups.objects.get(id=group_id),
-        'users': User.objects.filter(members__id=group_id)
+        'users': User.objects.exclude(members__id=group_id) & User.objects.exclude(id=request.user.id),
+        'group_id': group_id,
     }
 
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
         redirect('/')
 
-    friends = Friends.objects.filter(from_user_id=request.user)
-    friends_id = [friend.to_user_id for friend in friends]
-    users_friends_all = User.objects.filter(id__in=friends_id)
+    context['users_size'] = len(context['users'])
+    if request.method == 'POST':
+        form = SearchFriends(request.POST)
+        if form.is_valid():
+            search = form.cleaned_data['search']
 
-    friends_group = User.objects.filter(members__id=group_id)
-    friends_group_id = [friend.id for friend in friends_group]
-    users_friends = User.objects.exclude(id__in=friends_group_id)
+            friends = Friends.objects.filter(from_user_id=request.user)
+            friends_id = [friend.to_user_id for friend in friends]
+            users_friends_all = User.objects.filter(id__in=friends_id)
 
-    my_user = User.objects.exclude(id=request.user.id)
+            friends_group = User.objects.filter(members__id=group_id)
+            friends_group_id = [friend.id for friend in friends_group]
+            users_friends = User.objects.exclude(id__in=friends_group_id)
 
-    users_to_invite = my_user & users_friends_all & users_friends
-    context['users_to_invite'] = users_to_invite
-    context['users_to_invite_size'] = len(users_to_invite)
+            my_user = User.objects.exclude(id=request.user.id)
+
+            users_to_invite = my_user & users_friends_all & users_friends
+
+            users_search = (User.objects.filter(first_name__icontains=search) |
+                            User.objects.filter(last_name__icontains=search) |
+                            User.objects.filter(username__icontains=search))
+
+            users = users_search & users_to_invite
+            context['users'] = users
+            context['users_size'] = len(users)
+        else:
+            pass
+    else:
+        form = SearchFriends()
+    context['form'] = form
+
     if request.method == 'POST':
         if request.POST.get('invite'):
             invented = Friends.objects.get(from_user_id=request.POST.get('invite'))
             invented = User.objects.get(id=invented.from_user_id)
             invented.members.add(context['group'])
-        return redirect('/groups/add_to_group/')
+            return redirect('/group/add_to_group/' + str(context['group_id']))
 
     return render(request, 'pages/groups/add_to_group.html', context)

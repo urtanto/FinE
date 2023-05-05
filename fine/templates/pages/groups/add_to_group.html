@@ -7,12 +7,17 @@
 {% endblock %}
 
 {% block content %}
-{% if users_to_invite_size == 0 %}
+{% if users_size == 0 %}
 <h1>Некого пригласить в группу</h1>
 {% endif %}
-{% if users_to_invite_size > 0 %}
+<form method="post" action="{% url 'add_to_group'  group_id%}">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary float-right btn-block">искать</button>
+</form>
+{% if users_size > 0 %}
     <h1>Друзья пользователя:</h1>
-    {% for i in users_to_invite %}
+    {% for i in users %}
     <div class="card" style="width: 18rem;">
         {% if i.avatar %}
             <img class="card-img-top" src="{{i.from_user.avatar.url}}" alt="Card image cap">
