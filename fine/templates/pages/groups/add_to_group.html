@@ -7,5 +7,30 @@
 {% endblock %}
 
 {% block content %}
-
+{% if users_to_invite_size == 0 %}
+<h1>Некого пригласить в группу</h1>
+{% endif %}
+{% if users_to_invite_size > 0 %}
+    <h1>Друзья пользователя:</h1>
+    {% for i in users_to_invite %}
+    <div class="card" style="width: 18rem;">
+        {% if i.avatar %}
+            <img class="card-img-top" src="{{i.from_user.avatar.url}}" alt="Card image cap">
+        {% endif %}
+        {% if not i.avatar %}
+            <img class="card-img-top" src="{% static 'images/default_avatar.png' %}" alt="Card image cap">
+        {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{i.username}}</h5>
+        <p class="card-text">{{i.first_name}} {{i.last_name}}</p>
+      </div>
+      <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" value="{{i.id}}" name="invite">Invite</button>
+        </form>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
 {% endblock %}

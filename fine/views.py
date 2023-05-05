@@ -477,7 +477,24 @@ def add_to_group_page(request, group_id: int):
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
         redirect('/')
 
-    # invented = User.objects.get(id=1)
-    # invented.members.add(context['group'])
+    friends = Friends.objects.filter(from_user_id=request.user)
+    friends_id = [friend.to_user_id for friend in friends]
+    users_friends_all = User.objects.filter(id__in=friends_id)
+
+    friends_group = User.objects.filter(members__id=group_id)
+    friends_group_id = [friend.id for friend in friends_group]
+    users_friends = User.objects.exclude(id__in=friends_group_id)
+
+    my_user = User.objects.exclude(id=request.user.id)
+
+    users_to_invite = my_user & users_friends_all & users_friends
+    context['users_to_invite'] = users_to_invite
+    context['users_to_invite_size'] = len(users_to_invite)
+    if request.method == 'POST':
+        if request.POST.get('invite'):
+            invented = Friends.objects.get(from_user_id=request.POST.get('invite'))
+            invented = User.objects.get(id=invented.from_user_id)
+            invented.members.add(context['group'])
+        return redirect('/groups/add_to_group/')
 
     return render(request, 'pages/groups/add_to_group.html', context)
