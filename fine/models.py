@@ -4,10 +4,13 @@ from django.db import models
 
 
 class EntertainmentType(models.IntegerChoices):
-    Sport = 0
-    Quest = 1
-    Game = 2
-    Film = 3
+    """
+    Типы интересов
+    """
+    SPORT = 0
+    QUEST = 1
+    GAME = 2
+    FILM = 3
 
 
 class User(AbstractUser):
@@ -23,15 +26,24 @@ class User(AbstractUser):
 
 
 class UserSettings(models.Model):
+    """
+    Настройки пользователя
+    """
     user = models.OneToOneField(to=get_user_model(), on_delete=models.CASCADE)
 
 
 class Event(models.Model):
+    """
+    Класс ивента
+    """
     name = models.CharField(max_length=255)
 
     class Type(models.IntegerChoices):
-        Close = 0
-        Open = 1
+        """
+        Закрыт или открыт ивент
+        """
+        CLOSE = 0
+        OPEN = 1
 
     type = models.IntegerField(choices=Type.choices)
     address = models.CharField(max_length=255)
@@ -44,19 +56,31 @@ class Event(models.Model):
 
 
 class Interests(models.Model):
+    """
+    Интересы у пользователя
+    """
     interest = models.IntegerField(choices=EntertainmentType.choices)
     user = models.ForeignKey(get_user_model(), models.CASCADE)
 
 
 class RegistrationEvents(models.Model):
+    """
+    Класс регистрации на ивент
+    """
     event = models.ForeignKey(Event, models.CASCADE)
     user = models.ForeignKey(get_user_model(), models.CASCADE)
 
 
 class Report(models.Model):
+    """
+    Класс репорта
+    """
     class Type(models.IntegerChoices):
-        Waiting = 1
-        Close = 2
+        """
+        Закрыт репорт или нет
+        """
+        WAITING = 1
+        CLOSE = 2
 
     author = models.ForeignKey(get_user_model(), models.CASCADE)
     report_text = models.TextField()
@@ -67,6 +91,9 @@ class Report(models.Model):
 
 
 class Friends(models.Model):
+    """
+    Запрос на друзья
+    """
     from_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='who_send')
     to_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='who_receive')
     waiting = models.BooleanField()

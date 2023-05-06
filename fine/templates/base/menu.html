@@ -1,19 +1,12 @@
 {% block menu %}
-<div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-    {% for item in menu %}
-    {% if item.url_name == "my_votings" and request.user.is_authenticated or item.url_name != "my_votings" %}
-    <a class="btn btn-primary " href="{% url item.url_name %}">{{ item.name }}</a>
-    {% endif %}
-    {% endfor %}
-
-    {% if request.user.is_authenticated %}
-    <a class="btn btn-primary " href="/profile/{{request.user.id}}">Profile</a>
-    <a class="btn btn-primary " href="/search_friends/">Поискать друзей</a>
-    <a class="btn btn-primary " href="/menu/event/create/">Создать мероприятие</a>
-    {% endif %}
-    {% if not request.user.is_authenticated %}
-    <a class="btn btn-primary " href="{% url 'login' %}">Login</a>
-    {% endif %}
-
-</div>
+    <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
+        {% for item in menu.left|is_authenticated:request.user.is_authenticated %}
+            <a class="btn {{ item|get_style }} {{ item.url_name|is_active:active }}" href="{{ item.url_name }}">{{ item.name }}</a>
+        {% endfor %}
+    </div>
+    <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
+        {% for item in menu.right|is_authenticated:request.user.is_authenticated %}
+            <a class="btn {{ item|get_style }} {{ item.url_name|is_active:active }}" href="{{ item.url_name }}">{{ item.name }}</a>
+        {% endfor %}
+    </div>
 {% endblock %}

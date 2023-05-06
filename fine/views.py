@@ -1,36 +1,99 @@
-from django.contrib.auth.decorators import login_required
+import json
+
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, redirect
-
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
+from django.template.defaultfilters import register
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
+
 from fine.models import RegistrationEvents, User, Interests, Event, Friends
-from django.contrib.auth.hashers import make_password, check_password
-import json
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
 
 
-def get_menu_context():
+@register.filter
+def is_authenticated(menu_dict: dict, is_auth: bool):
+    """
+    Функция, которая возвращает нужный контекст для меню
+    :param menu_dict: контекст меню из get_context
+    :param is_auth: request.user.is_authenticated
+    :return: нужный контекст
+    """
+    if is_auth:
+        return menu_dict["authorized"]
+    return menu_dict["unauthorized"]
+
+
+@register.filter
+def is_active(first_url: str, second_url: str):
+    """
+    Проверка на активную кнопку
+    :param first_url: юрл кнопки
+    :param second_url: юрл активной кнопки
+    :return: active в класс кнопки
+    """
+    if first_url == second_url:
+        return "active"
+    return ""
+
+
+@register.filter
+def get_style(item: dict):
+    """
+    Функция для получения стиля для кнопки меню
+    :param base_str: ""
+    :param item: контекст кнопки
+    :return: стиль для кнопки
+    """
+    return item.get("button-style", "btn-primary")
+
+
+def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
     """
     Функция для возвращения контекста меню
 
     :return: контекст меню
     """
-    return [
-        {'url_name': 'index', 'name': 'Меню'},
-        {'url_name': 'index', 'name': 'Главная страница'},
-    ]
+    data = {
+        'pagename': page_name,
+        "active": active,
+        "menu": {
+            "left": {
+                "unauthorized": [
+                    {'url_name': '/', 'name': 'Главная страница'},
+                    {'url_name': '/', 'name': 'Меню'},
+                ],
+            },
+            "right": {
+                "unauthorized": [
+                    {'url_name': '/registration/', 'name': 'Зарегистрироваться'},
+                    {'url_name': '/login/', 'name': 'Войти', "button-style": "btn-outline-primary"},
+                ],
+            },
+        }
+    }
+    if not request:
+        return data
+    if request.user.is_authenticated:
+        data["menu"]["left"]["authorized"] = [
+            {'url_name': reverse('index'), 'name': 'Главная страница'},
+            {'url_name': reverse('index'), 'name': 'Меню'},
+            {'url_name': reverse('friends'), 'name': 'Друзья'},
+        ]
+        data["menu"]["right"]["authorized"] = [
+            {'url_name': reverse('profile', kwargs={'code': request.user.id}), 'name': 'Профиль'},
+            {'url_name': reverse('logout'), 'name': 'Выйти', "button-style": "btn-outline-primary"},
+        ]
+    return data
 
 
 def index_page(request: WSGIRequest):
     """
     Функция обрабатывающая запрос /
     """
-    context = {
-        'pagename': 'Simple voting',
-        'menu': get_menu_context(),
-        "events": Event.objects.all()
-    }
+    context = get_context(request, "Simple voting", reverse("index"))
+    context["events"] = Event.objects.all()
     return render(request, 'pages/start/index.html', context)
 
 
@@ -38,7 +101,7 @@ def registration_page(request: WSGIRequest):
     """
     Страница регистрации пользователя.
     """
-    context = {'pagename': 'Регистрация'}
+    context = get_context(request, "Регистрация", reverse("register"))
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -47,8 +110,7 @@ def registration_page(request: WSGIRequest):
                         email=form.cleaned_data['email'])
             user.save()
             return redirect('/')
-        else:
-            pass
+        context['errors'] = form.errors
     else:
         form = RegistrationForm()
     context['form'] = form
@@ -65,11 +127,11 @@ INTERESTS = {
 
 
 @login_required
-def event_create_page(request):
+def event_create_page(request: WSGIRequest):
     """
     Страница с созданием ивента.
     """
-    context = {'pagename': 'CreateEvent', 'menu': get_menu_context()}
+    context = get_context(request, "Create Event")
     if request.method == 'POST':
         form = CreateEvent(request.POST)
         if form.is_valid():
@@ -82,8 +144,7 @@ def event_create_page(request):
                           author=request.user)
             event.save()
             return redirect('/')
-        else:
-            pass
+        context['errors'] = form.errors
     else:
         form = CreateEvent()
     context['form'] = form
@@ -96,7 +157,8 @@ def event_edit_page(request: WSGIRequest, event_id: int):
     Cтраница изменения ивента.
     :param event_id: ID иваента.
     """
-    context = {'pagename': 'EditEvent', 'menu': get_menu_context(), 'event_id': event_id}
+    context = get_context(request, "Edit Event")
+    context["event_id"] = event_id
     event = Event.objects.get(pk=event_id)
     form = CreateEvent(instance=event)
     if request.method == 'POST':
@@ -143,29 +205,22 @@ def profile_view_page(request: WSGIRequest, code: int):
     Страница профиля пользователя.
     :param code: ID пользователя.
     """
-    context = {'pagename': 'Profile',
-               'menu': get_menu_context(),
-               'cur_user': request.user}
+    context = get_context(request, "Profile", reverse("profile", kwargs={'code': code}))
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
-
         context['interests'] = []  # интересы пользователя
         Interests.objects.filter(user=code).values_list('interest', flat=True)
         for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
             context['interests'].append(INTERESTS[i])
-
-
-    except User.DoesNotExist:
+    except User.DoesNotExist as user_does_not_exist:
         context['events'] = None
         context['interests'] = None
-        raise Http404
-
+        raise Http404 from user_does_not_exist
     if request.user.is_authenticated:
         try:
             friend = Friends.objects.get(from_user=request.user, to_user=User.objects.get(id=code))
             context['waiting_friend'] = friend.waiting
-
         except Friends.DoesNotExist:
             context['already_friend'] = False
         try:
@@ -173,7 +228,6 @@ def profile_view_page(request: WSGIRequest, code: int):
             context['have_request'] = True
         except Friends.DoesNotExist:
             context['have_request'] = False
-
     if request.method == 'POST':
         friends_for_profile_view_page_algo(request, code)
 
@@ -183,15 +237,11 @@ def profile_view_page(request: WSGIRequest, code: int):
 
 
 @login_required
-def edit_page(request):
+def edit_page(request: WSGIRequest):
     """
     Страница редактирования основной информации профиля.
     """
-    context = {
-        'pagename': 'Profile Editing',
-        'menu': get_menu_context(),
-        'user': request.user
-    }
+    context = get_context(request, "Profile Editing", reverse("profile", kwargs={'code': request.user.id}))
 
     cur_user = User.objects.get(username=request.user.username)
     form = EditProfile(instance=cur_user)
@@ -222,14 +272,11 @@ def to_fit(arr, size, request):
 
 
 @login_required
-def edit_interests_page(request):
+def edit_interests_page(request: WSGIRequest):
     """
     Страница с редактированием интересов пользователя.
     """
-    context = {
-        'pagename': 'Profile Editing',
-        'menu': get_menu_context(),
-    }
+    context = get_context(request, "Profile Editing", reverse("profile", kwargs={'code': request.user.id}))
     if request.method == 'POST':
         form = InterestsForm(request.POST)
         if form.is_valid():
@@ -276,6 +323,11 @@ def friends_algo(request: WSGIRequest):
 
 
 def get_user(received_object: RegistrationEvents | Friends) -> User:
+    """
+    получает юзера из RegistrationEvents/Friends
+    :param received_object: объект RegistrationEvents/Friends
+    :return: объект User
+    """
     if isinstance(received_object, Friends):
         return received_object.from_user
     return received_object.user
@@ -283,10 +335,13 @@ def get_user(received_object: RegistrationEvents | Friends) -> User:
 
 @login_required
 def event_page(request: WSGIRequest, event_id: int):
-    context = {
-        'pagename': 'Profile Editing',
-        'menu': get_menu_context(),
-    }
+    """
+
+    :param request:
+    :param event_id:
+    :return:
+    """
+    context = get_context(request, "Profile Editing")
     try:
         event: Event = list(Event.objects.filter(id=int(event_id)))[0]
         if request.method == 'POST':
@@ -304,7 +359,7 @@ def event_page(request: WSGIRequest, event_id: int):
         context['event'] = event
         context['friends'] = friends
         context['people'] = people
-        context['going'] = True if request.user in people else False
+        context['going'] = request.user in people
     except IndexError:
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
@@ -315,7 +370,9 @@ def search_friends(request):
     """
     Страница по поиску людей
     """
-    context = {'pagename': 'Search friends', 'menu': get_menu_context(), 'users': User.objects.all(), 'users_size': 0}
+    context = get_context(request, "Search friends", reverse("friends"))
+    context['users'] = User.objects.all()
+    context['users_size'] = 0
     if request.method == 'POST':
         form = SearchFriends(request.POST)
         if form.is_valid():
@@ -351,36 +408,27 @@ def friends_only_page(request):
     """
     Страница только с друзьями пользователя
     """
-    context = {
-        'pagename': 'Friends',
-        'menu': get_menu_context(),
-        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
-    }
+    context = get_context(request, "Friends", reverse("friends"))
+    context['friends'] = Friends.objects.filter(to_user=request.user, waiting=False)
     context['friends_size'] = len(context['friends'])
-
     if request.method == 'POST':
         if request.POST.get('del_friend'):
             friend = Friends.objects.get(id=request.POST.get('del_friend'))
             Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
             Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
-
         return redirect('/friends_only/')
-
     return render(request, 'pages/friends/friends_only_page.html', context)
 
 
 @login_required
-def friends_page(request):
+def friends_page(request: WSGIRequest):
     """
     Страница с друзьями пользователя
     """
-    context = {
-        'pagename': 'Friends',
-        'menu': get_menu_context(),
-        'friends': Friends.objects.filter(to_user=request.user, waiting=False),
-        'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
-        'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
-    }
+    context = get_context(request, "Friends", reverse("friends"))
+    context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False))
+    context["friends_request_to_user"] = list(Friends.objects.filter(to_user=request.user, waiting=True))
+    context["friends_request_by_user"] = list(Friends.objects.filter(from_user=request.user, waiting=True))
     context['friends_size'] = len(context['friends'])
     context['friends_request_to_user_size'] = len(context['friends_request_to_user'])
     context['friends_request_by_user_size'] = len(context['friends_request_by_user'])
