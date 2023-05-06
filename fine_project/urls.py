@@ -1,4 +1,4 @@
-"""djangoProject URL Configuration
+"""fine_project URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.1/topics/http/urls/
@@ -18,9 +18,12 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
 
-from djangoProject import settings
+from fine_project import settings
 from fine import views
-from fine.views import get_menu_context
+from fine.views import get_context
+
+context_for_login = get_context(page_name="Авторизация", active="/login/")
+context_for_login["menu"]["right"]["unauthorized"][1] = {'url_name': '/login/', 'name': 'Войти'}
 
 urlpatterns = [
     path('', views.index_page, name='index'),
@@ -28,10 +31,7 @@ urlpatterns = [
     path('profile/<int:code>', views.profile_view_page, name='profile'),
     path('login/',
          auth_views.LoginView.as_view(
-             extra_context={
-                 'menu': get_menu_context(),
-                 'pagename': 'Авторизация'
-             }
+             extra_context=context_for_login
          ),
          name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),

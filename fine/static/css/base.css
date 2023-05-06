@@ -16,6 +16,7 @@ body {
     background: #fff;
     margin-top: 2vh;
     border-radius: 0.5rem;
+    height: 7vh;
 }
 
 .header {
@@ -29,16 +30,26 @@ body {
 
 .borders {
     display: flex;
-    padding: 3vh;
+    padding: 1.5vw;
     background: #fff;
     margin-top: 2vh;
     border-radius: 0.5rem;
     min-height: 77vh;
     max-height: 77vh;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80vw;
 }
 
 .np {
     padding: 0 0 0 0;
+}
+
+.mycontainer {
+    width: 80vw;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgba(255, 255, 255, 0.75);
 }
 
 a {

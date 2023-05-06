@@ -50,9 +50,10 @@ ignore=venv,
        .git,
        .gitlab,
        manage.py,
-       docs
+       docs,
+       apps.py
 
-django-settings-module=djangoProject.settings
+django-settings-module=fine_project.settings
 
 # Add files or directories matching the regular expressions patterns to the
 # ignore-list. The regex matches against paths and can be in Posix or Windows
@@ -342,7 +343,7 @@ indent-after-paren=4
 indent-string='    '
 
 # Maximum number of characters on a single line.
-max-line-length=100
+max-line-length=120
 
 # Maximum number of lines in a module.
 max-module-lines=1000
@@ -434,9 +435,7 @@ disable=raw-checker-failed,
         useless-suppression,
         deprecated-pragma,
         use-symbolic-message-instead,
-        C0114,
-        C0115,
-        C0116
+        C0114
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
