@@ -449,7 +449,7 @@ def friends_page(request: WSGIRequest):
     Страница с друзьями пользователя
     """
     context = get_context(request, "Friends", reverse("friends"))
-    context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False)) * 12
+    context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False))
     context["friends_request_to_user"] = list(Friends.objects.filter(to_user=request.user, waiting=True))
     context["friends_request_by_user"] = list(Friends.objects.filter(from_user=request.user, waiting=True))
     context['friends_size'] = len(context['friends'])
