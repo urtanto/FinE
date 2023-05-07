@@ -45,6 +45,7 @@ urlpatterns = [
     path('friends/', views.friends_page, name='friends'),
     path('search_friends/', views.search_friends, name='search_friends'),
     path('friends_only/', views.friends_only_page, name='friends_only'),
+    path('theme/change/', views.theme_change),
 ]
 
 if settings.DEBUG:

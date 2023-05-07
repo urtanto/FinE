@@ -5,7 +5,8 @@
 }
 
 .mycard {
-    width: calc((80vw - 4vw - 2vw * 4) / 5);
+    --my-width: calc((79vw - 4vw - 2vw * 4) / 5);
+    width: var(--my-width);
     border: 2px solid #ccc;
     padding: 2px;
     border-radius: 0.5rem;
@@ -13,13 +14,14 @@
 }
 
 .mycard > img {
-    width: calc((80vw - 4vw - 2vw * 4) / 5);
-    height: calc((80vw - 4vw - 2vw * 4) / 5);
+    width: var(--my-width);
+    height: var(--my-width);
     border: 2px solid #ccc;
     border-radius: 0.5rem;
     margin-left: -4px;
     margin-top: -4px;
     object-fit: cover;
+    background-color: #FFFFFF;
 }
 
 .for-tag {
@@ -29,7 +31,7 @@
 .center-message {
     display: flex;
     width: 100%;
-    height: 64vh;
+    height: 100%;
     align-items: center;
     justify-content: center;
 }
@@ -46,3 +48,34 @@
 }
 
 .min_pad {}
+
+
+
+@media screen and (max-device-width: 1500px) {
+            .mycard {
+                width: calc((79vw - 4vw - 2vw * 4) / 5);
+            }
+
+            .min_pad {
+                padding: 0;
+            }
+
+            .min_pad_btn {
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .myform {
+                display: flex;
+            }
+
+            .myform > button {
+                display: block;
+                width: 100%;
+            }
+
+            .special-margin {
+                margin-top: 10px;
+                margin-bottom: 2px;
+            }
+        }

@@ -1,5 +1,12 @@
 {% extends 'base/base.html' %}
 {% load bootstrap5 %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+{% endblock %}
+
 {% block content %}
-    <h1 class="mt-4">:(</h1>
+    <div class="center-message">
+        <h1 class="mt-4">:(</h1>
+    </div>
 {% endblock %}
