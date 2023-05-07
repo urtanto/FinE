@@ -139,9 +139,9 @@
                                      alt="Card image cap">
                             {% endif %}
                             <div class="card-body" style="padding-bottom: 0;">
-                                <h5 class="card-title for-tag">{{ i.from_user.first_name }} {{ i.from_user.last_name }}</h5>
+                                <h5 class="card-title for-tag">{{ i.to_user.first_name }} {{ i.to_user.last_name }}</h5>
                                 <a class="card-text card-link"
-                                   href="{% url 'profile' code=i.from_user.id %}">@{{ i.from_user.username }}</a>
+                                   href="{% url 'profile' code=i.to_user.id %}">@{{ i.to_user.username }}</a>
                             </div>
                             <div class="card-body">
                                 <form method="post">
