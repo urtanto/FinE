@@ -23,6 +23,7 @@ class User(AbstractUser):
     phone_number = models.CharField(null=True, max_length=20)
     avatar = models.ImageField(upload_to='images/', blank=True, null=True)
     events = models.ManyToManyField("Event")
+    theme = models.CharField(max_length=255, default="white")
 
 
 class UserSettings(models.Model):

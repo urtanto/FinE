@@ -1,9 +1,35 @@
+* {
+    transition: 0.5s ease color, background-color, background;
+    color: #000000;
+}
+
+
 body {
-    height: 98vh;
+    height: 100vh;
 }
 
 .gradient-background {
-    background: -webkit-linear-gradient(bottom left, #3931af, #00c6ff);
+    /*background: linear-gradient(bottom left, #3931af, #00c6ff);*/
+    /*background:  linear-gradient(45deg, #3931af 0%, #00c6ff 100%);*/
+    /*background: -webkit-linear-gradient(bottom left, #000033, #8b00ff);*/
+    background-image: linear-gradient(45deg, #3931af 0%, #00c6ff 100%);
+    z-index: 100;
+}
+
+.gradient-background:before {
+    background-image: linear-gradient(45deg, #000033 0%, #8b00ff 100%);
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    /*height: 100vh;*/
+    /*width: 100vw;*/
+    z-index: -100;
+    transition: opacity 0.5s;
 }
 
 .full-screen {
@@ -41,8 +67,36 @@ body {
     width: 80vw;
 }
 
+html {
+    --scrollbarBg: linear-gradient(180deg, #3931af 0%, #00c6ff 50%, #3931af 100%);
+    --scrollbarThumb: rgba(0, 0, 0, 0.5);
+    --scrollbarWidth: 12px;
+    --scrollbarBorder: 3px solid var(--scrollbarBg);
+    --scrollbarBorderRadius: calc(var(--scrollbarWidth) / 2);
+}
+
 .np {
+    display: flex;
+    flex-direction: column;
+    justify-items: stretch;
     padding: 0 0 0 0;
+    scrollbar-width: var(--scrollbarWidth);
+    scrollbar-color: var(--scrollbarThumb) var(--scrollbarBg);
+}
+
+.np::-webkit-scrollbar {
+    width: var(--scrollbarWidth);
+}
+
+.np::-webkit-scrollbar-track {
+    background: var(--scrollbarBg);
+    border-radius: var(--scrollbarBorderRadius);
+}
+
+.np::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbarThumb);
+    border-radius: var(--scrollbarBorderRadius);
+    border: var(--scrollbarBorder);
 }
 
 .mycontainer {
@@ -50,8 +104,20 @@ body {
     margin-left: auto;
     margin-right: auto;
     background-color: rgba(255, 255, 255, 0.75);
+    /*background-color: rgba(0, 0, 0, 0.75);*/
 }
 
 a {
     text-decoration: none;
+}
+
+.theme-change-button {
+    transition: 0.1s linear color, background-color, background;
+    width: 68px;
+    height: 68px;
+    border-radius: 0.5rem;
+    margin-left: 2vh;
+    margin-right: 0;
+    margin-top: 2vh;
+    padding: 1vw;
 }

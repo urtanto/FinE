@@ -1,7 +1,7 @@
 import json
 
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.template.defaultfilters import register
 from django.urls import reverse
@@ -49,6 +49,16 @@ def get_style(item: dict):
     return item.get("button-style", "btn-primary")
 
 
+@register.filter
+def get_theme(request: WSGIRequest):
+    """
+    получение темы пользователя
+    """
+    if request.user.is_authenticated and request.user.theme == "dark":
+        return "dark"
+    return ""
+
+
 def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
     """
     Функция для возвращения контекста меню
@@ -80,12 +90,25 @@ def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
             {'url_name': reverse('index'), 'name': 'Главная страница'},
             {'url_name': reverse('index'), 'name': 'Меню'},
             {'url_name': reverse('friends'), 'name': 'Друзья'},
+            {'url_name': reverse('search_friends'), 'name': 'Найти друга'},
         ]
         data["menu"]["right"]["authorized"] = [
             {'url_name': reverse('profile', kwargs={'code': request.user.id}), 'name': 'Профиль'},
             {'url_name': reverse('logout'), 'name': 'Выйти', "button-style": "btn-outline-primary"},
         ]
     return data
+
+
+@login_required
+def theme_change(request: WSGIRequest):
+    """
+    Меняет тему пользователя
+    """
+    if request.user.theme == "white":
+        User.objects.filter(id=request.user.id).update(theme="dark")
+    if request.user.theme == "dark":
+        User.objects.filter(id=request.user.id).update(theme="white")
+    return JsonResponse({"details": "ok"})
 
 
 def index_page(request: WSGIRequest):
@@ -370,7 +393,7 @@ def search_friends(request):
     """
     Страница по поиску людей
     """
-    context = get_context(request, "Search friends", reverse("friends"))
+    context = get_context(request, "Search friends", reverse("search_friends"))
     context['users'] = User.objects.all()
     context['users_size'] = 0
     if request.method == 'POST':
@@ -426,7 +449,7 @@ def friends_page(request: WSGIRequest):
     Страница с друзьями пользователя
     """
     context = get_context(request, "Friends", reverse("friends"))
-    context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False))
+    context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False)) * 12
     context["friends_request_to_user"] = list(Friends.objects.filter(to_user=request.user, waiting=True))
     context["friends_request_by_user"] = list(Friends.objects.filter(from_user=request.user, waiting=True))
     context['friends_size'] = len(context['friends'])
