@@ -425,7 +425,8 @@ def create_group_page(request):
     if request.method == 'POST':
         form = CreateGroup(request.POST)
         if form.is_valid():
-            UserGroups.objects.create(title=form.cleaned_data['title'], description=form.cleaned_data['description'],
+            UserGroups.objects.create(title=form.cleaned_data['title'],
+                                      description=form.cleaned_data['description'],
                                       founder=request.user)
 
             return redirect('/')
@@ -456,9 +457,8 @@ def group_page(request, group_id: int):
         'group': UserGroups.objects.get(id=group_id),
         'users': User.objects.filter(members__id=group_id)
     }
-    if UserGroups.objects.get(
-            id=group_id).founder.id is not request.user.id and group_id not in request.user.members.all().values_list(
-        'id', flat=True):
+    if UserGroups.objects.get(id=group_id).founder.id is not request.user.id and\
+            group_id not in request.user.members.all().values_list('id', flat=True):
         return redirect('/')
 
     return render(request, 'pages/groups/group.html', context)

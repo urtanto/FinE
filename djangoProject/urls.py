@@ -46,10 +46,10 @@ urlpatterns = [
     path('search_friends/', views.search_friends, name='search_friends'),
     path('friends_only/', views.friends_only_page, name='friends_only'),
     path('friends/', views.friends_page, name='friends'),
-    path('create_group/', views.create_group_page, name='create_group'),
+    path('groups/create_group/', views.create_group_page, name='create_group'),
     path('groups/', views.groups_page, name='groups'),
-    path('group/<int:group_id>', views.group_page, name='group'),
-    path('group/add_to_group/<int:group_id>', views.add_to_group_page, name='add_to_group')
+    path('groups/group/<int:group_id>', views.group_page, name='group'),
+    path('groups/group/add_to_group/<int:group_id>', views.add_to_group_page, name='add_to_group')
 ]
 
 if settings.DEBUG:

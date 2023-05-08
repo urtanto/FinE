@@ -7,9 +7,34 @@
 {% endblock %}
 
 {% block content %}
-
-{{groups}}
+<div class="container">
+    <div class="row">
+        {% for group in groups %}
+            <div class="col-md-4">
+                <div class="card" style="width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title">{{group.title}}</h5>
+                    <p class="card-text">{{group.description}}</p>
+                    <a href="group/{{group.id}}" class="btn btn-primary">Go somewhere</a>
+                  </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 <hr>
-{{my_groups}}
+    <div class="row">
+        {% for group in my_groups %}
+            <div class="col-md-3">
+                <div class="card" style="width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title">{{group.title}}</h5>
+                    <p class="card-text">{{group.description}}</p>
+                    <a href="group/{{group.id}}" class="d-grid gap-2 col-6 mx-auto btn btn-primary">Info</a>
+                  </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}
