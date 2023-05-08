@@ -2,22 +2,22 @@
 
 
 {% block content %}
-<div class="row mt-3">
-    <div class="col">
-        <h1>Wellcome!</h1>
+    <div class="row mt-3">
+        <div class="col">
+            <h1>Wellcome!</h1>
+        </div>
     </div>
-</div>
-{% if request.user.is_authenticated %}
-<p>DA</p>
-{% endif %}
-<a href="{% url 'login' %}">Войти</a>
-<p></p>
-<a href="{% url 'register' %}">Зарегистрироваться</a>
-<p></p>
-<a href="{% url 'logout' %}">Выйти</a>
-<p></p>
-{% for event in events %}
-<a href="{% url 'event_commit' event_id=event.id%}">{{event.name}}</a>
-<p></p>
-{% endfor %}
+    {% if request.user.is_authenticated %}
+        <p>DA</p>
+    {% endif %}
+    <a href="{% url 'login' %}">Войти</a>
+    <p></p>
+    <a href="{% url 'register' %}">Зарегистрироваться</a>
+    <p></p>
+    <a href="{% url 'logout' %}">Выйти</a>
+    <p></p>
+    {% for event in events %}
+        <a href="{% url 'event_commit' event_id=event.id %}">{{ event.name }}</a>
+        <p></p>
+    {% endfor %}
 {% endblock %}

@@ -4,112 +4,119 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
 {% endblock %}
 
 {% block content %}
-<div class="container emp-profile">
-    <form method="post">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="profile-img">
-                    {% if user.avatar %}
-                    <img src="{{user.avatar.url}}">
-                    {% endif %}
-                    {% if not user.avatar %}
-                    <img src="{%static 'images/default_avatar.png' %}">
-                    {% endif %}
-                    {% if cur_user == user %}
-                    <a href="{% url 'edition_about' %}">
-                        <div class="file btn btn-lg btn-primary">
-                            Change Profile
-                        </div>
-                    </a>
-                    {% endif %}
-                    {% if cur_user != user and cur_user.is_authenticated %}
-                    <form method="post">
-                        {% csrf_token %}
-                        {% if already_friend is False and have_request is False %}
-                        <button type="submit" class="btn btn-outline-primary" value="friend_button" name="button">Friend request</button>
+    <div class="container emp-profile">
+        <form method="post">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="profile-img">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}">
+                        {% else %}
+                            <img src="{% static 'images/default_avatar.png' %}">
                         {% endif %}
-                        {% if waiting_friend is True and have_request is False %}
-                        <button type="submit" class="btn btn-outline-primary" value="del_request" name="button">Delete friend request</button>
+                        {% if request.user == user %}
+                            <a href="{% url 'edition_about' %}">
+                                <div class="file btn btn-lg btn-primary">
+                                    Change Profile
+                                </div>
+                            </a>
                         {% endif %}
-                        {% if waiting_friend is False and have_request is False %}
-                        <button type="submit" class="btn btn-outline-primary" value="del_friend" name="button">Delete friend</button>
+                        {% if request.user != user and request.user.is_authenticated %}
+                            <form method="post">
+                                {% csrf_token %}
+                                {% if already_friend is False and have_request is False %}
+                                    <button type="submit" class="btn btn-outline-primary" value="friend_button"
+                                            name="button">Friend request
+                                    </button>
+                                {% endif %}
+                                {% if waiting_friend is True and have_request is False %}
+                                    <button type="submit" class="btn btn-outline-primary" value="del_request"
+                                            name="button">Delete friend request
+                                    </button>
+                                {% endif %}
+                                {% if waiting_friend is False and have_request is False %}
+                                    <button type="submit" class="btn btn-outline-primary" value="del_friend"
+                                            name="button">Delete friend
+                                    </button>
+                                {% endif %}
+                                {% if have_request is True %}
+                                    <button type="submit" class="btn btn-outline-primary" value="acp_friend"
+                                            name="button">Accept friend
+                                    </button>
+                                {% endif %}
+                            </form>
                         {% endif %}
-                        {% if have_request is True %}
-                        <button type="submit" class="btn btn-outline-primary" value="acp_friend" name="button">Accept friend</button>
-                        {% endif %}
-                    </form>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="profile-head">
-                    <h5>
-                        {{user.username}}
-                    </h5>
-                    <h6>
-                        {{user.first_name}} {{user.last_name}}
-                    </h6>
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#about" role="tab"
-                               aria-controls="home" aria-selected="true">About</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <div class="tab-content profile-tab" id="myTabContent">
-                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>User Id</label>
-                        </div>
-                        <div class="col-md-6">
-                            <p>{{user.id}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Name</label>
-                        </div>
-                        <div class="col-md-6">
-                            <p>{{user.first_name}} {{user.last_name}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Email</label>
-                        </div>
-                        <div class="col-md-6">
-                            <p>{{user.email}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Phone</label>
-                        </div>
-                        <div class="col-md-6">
-                            <p>{{user.phone_number}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>User from</label>
-                        </div>
-                        <div class="col-md-6">
-                            <p>{{user.date_joined.date}}</p>
-                        </div>
+                <div class="col-md-6">
+                    <div class="profile-head">
+                        <h5>
+                            {{ user.username }}
+                        </h5>
+                        <h6>
+                            {{ user.first_name }} {{ user.last_name }}
+                        </h6>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#about" role="tab"
+                                   aria-controls="home" aria-selected="true">About</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-        {{interests}}
-    </form>
-</div>
+            <div class="col-md-8">
+                <div class="tab-content profile-tab" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>User Id</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{ user.id }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Name</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{ user.first_name }} {{ user.last_name }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Email</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Phone</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{ user.phone_number }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>User from</label>
+                            </div>
+                            <div class="col-md-6">
+                                <p>{{ user.date_joined.date }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ interests }}
+        </form>
+    </div>
 {% endblock %}
 

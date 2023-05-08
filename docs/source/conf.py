@@ -10,7 +10,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath('../../'))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangoProject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'fine_project.settings')
 
 import django
 

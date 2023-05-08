@@ -31,12 +31,16 @@ class EditProfile(forms.ModelForm):
     """
     Форма для изменения основных данных профиля пользователя.
     """
+
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'avatar']
 
 
 class SearchFriends(forms.Form):
+    """
+    Форма для поиска друзей.
+    """
     search = forms.CharField(max_length=255)
 
 
