@@ -420,7 +420,7 @@ def search_friends(request):
         form = SearchFriends(request.POST)
         if form.is_valid():
             search = form.cleaned_data['search']
-            friends = Friends.objects.filter(from_user_id=request.user)
+            friends = get_friends(request.user.id)
             friends_id = [friend.to_user_id for friend in friends]
 
             users_search = (User.objects.filter(first_name__icontains=search) |
@@ -539,6 +539,7 @@ def add_to_group_page(request, group_id: int):
     context = get_context(request, 'Adding to Group №' + str(group_id))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
+
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
         return redirect('/groups/group/' + str(group_id))
 
@@ -575,7 +576,7 @@ def add_to_group_page(request, group_id: int):
 
     if request.method == 'POST':
         if request.POST.get('invite'):
-            invented = Friends.objects.get(from_user_id=request.POST.get('invite'))
+            invented = Friends.objects.get(from_user_id=request.POST.get('invite'), to_user=request.user)
             invented = User.objects.get(id=invented.from_user_id)
             invented.members.add(context['group'])
             return redirect('/groups/group/add_to_group/' + str(context['group_id']))
