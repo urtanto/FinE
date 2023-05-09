@@ -1,12 +1,21 @@
 {% extends 'base/base.html' %}
 {% load bootstrap5 %}
 {% load static %}
-{% block extra_css %}
 
-<link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
 {% endblock %}
 
 {% block content %}
+
+{% if groups_size == 0 %}
+<h5>Вы не состоите в группах.</h5>
+<hr>
+{% endif %}
+
+{% if groups_size > 0 %}
+<h5>Группы, в которых вы состоите: </h5>
 <div class="container">
     <div class="row">
         {% for group in groups %}
@@ -23,6 +32,13 @@
     </div>
 </div>
 <hr>
+{% endif %}
+
+{% if my_groups_size == 0 %}
+<h5>У Вас нет групп.</h5>
+{% endif %}
+
+{% if my_groups_size > 0 %}
     <div class="row">
         {% for group in my_groups %}
             <div class="col-md-3">
@@ -30,11 +46,14 @@
                   <div class="card-body">
                     <h5 class="card-title">{{group.title}}</h5>
                     <p class="card-text">{{group.description}}</p>
-                    <a href="group/{{group.id}}" class="d-grid gap-2 col-6 mx-auto btn btn-primary">Info</a>
+                    <a href="group/{{group.id}}" class="d-grid gap-2 col-6 mx-auto btn btn-primary">Информация</a>
                   </div>
                 </div>
             </div>
         {% endfor %}
     </div>
+{% endif %}
 
+<hr>
+<a href="create_group" class="d-grid gap-2 btn btn-primary" type="button">Создать Группу</a>
 {% endblock %}

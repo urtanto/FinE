@@ -3,15 +3,13 @@ import json
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
-
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, CreateGroup
-from fine.models import RegistrationEvents, User, Interests, Friends, UserGroups
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
+from django.template.defaultfilters import register
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 
-from fine.models import RegistrationEvents, User, Interests, Event, Friends
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
+from fine.models import RegistrationEvents, User, Interests, Event, Friends, UserGroups
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends, CreateGroup
 
 
 @register.filter
@@ -117,11 +115,6 @@ def index_page(request: WSGIRequest):
     """
     Функция, обрабатывающая запрос.
     """
-    context = {
-        'pagename': 'FinE',
-        'menu': get_menu_context(),
-        "events": Event.objects.all()
-    }
     context = get_context(request, "Simple voting", reverse("index"))
     context["events"] = Event.objects.all()
     return render(request, 'pages/start/index.html', context)
@@ -475,13 +468,7 @@ def friends_page(request: WSGIRequest):
     """
     Страница с друзьями пользователя
     """
-    context = {
-        'pagename': 'Friends',
-        'menu': get_menu_context(),
-        'friends': get_friends(request.user.id),
-        'friends_request_to_user': Friends.objects.filter(to_user=request.user, waiting=True),
-        'friends_request_by_user': Friends.objects.filter(from_user=request.user, waiting=True),
-    }
+
     context = get_context(request, "Friends", reverse("friends"))
     context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False))
     context["friends_request_to_user"] = list(Friends.objects.filter(to_user=request.user, waiting=True))
@@ -500,19 +487,16 @@ def friends_page(request: WSGIRequest):
 
 @login_required
 def create_group_page(request):
-    context = {
-        'pagename': 'Create Group',
-        'menu': get_menu_context(),
-    }
+    context = get_context(request, "Create Group")
 
     if request.method == 'POST':
         form = CreateGroup(request.POST)
         if form.is_valid():
-            UserGroups.objects.create(title=form.cleaned_data['title'],
+            group = UserGroups.objects.create(title=form.cleaned_data['title'],
                                       description=form.cleaned_data['description'],
                                       founder=request.user)
 
-            return redirect('/')
+            return redirect('/groups/group/' + str(group.id))
     else:
         form = CreateGroup()
     context['form'] = form
@@ -522,43 +506,37 @@ def create_group_page(request):
 
 @login_required
 def groups_page(request):
-    context = {
-        'pagename': 'Groups',
-        'menu': get_menu_context(),
-        'groups': request.user.members.all(),  # группы, где пользователь состоит
-        'my_groups': UserGroups.objects.filter(founder=request.user)  # группы, которыми владеет пользователь
-    }
+    context = get_context(request, "Groups")
+    context['groups'] = request.user.members.all()
+    context['groups_size'] = len(context['groups'])
+    context['my_groups'] = UserGroups.objects.filter(founder=request.user)
+    context['my_groups_size'] = len(context['my_groups'])
 
-    return render(request, 'pages/groups/groups.html', context)
+    return render(request, 'pages/groups/user_groups.html', context)
 
 
 @login_required
 def group_page(request, group_id: int):
-    context = {
-        'pagename': 'Group №' + str(group_id),
-        'menu': get_menu_context(),
-        'group': UserGroups.objects.get(id=group_id),
-        'users': User.objects.filter(members__id=group_id)
-    }
+    context = get_context(request, 'Group №' + str(group_id))
+    context['group'] = UserGroups.objects.get(id=group_id)
+    context['users'] = User.objects.filter(members__id=group_id)
+    context['user'] = request.user
+
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id and\
             group_id not in request.user.members.all().values_list('id', flat=True):
-        return redirect('/')
+        return redirect('/groups/')
 
     return render(request, 'pages/groups/group.html', context)
 
 
 @login_required
 def add_to_group_page(request, group_id: int):
-    context = {
-        'pagename': 'Adding to Group №' + str(group_id),
-        'menu': get_menu_context(),
-        'group': UserGroups.objects.get(id=group_id),
-        'users': User.objects.exclude(members__id=group_id) & User.objects.exclude(id=request.user.id),
-        'group_id': group_id,
-    }
-
+    context = get_context(request, 'Adding to Group №' + str(group_id))
+    context['group'] = UserGroups.objects.get(id=group_id)
+    context['users'] = User.objects.exclude(members__id=group_id) & User.objects.exclude(id=request.user.id)
+    context['group_id'] = group_id
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
-        redirect('/')
+        return redirect('/groups/group/' + str(group_id))
 
     context['users_size'] = len(context['users'])
     if request.method == 'POST':
@@ -596,6 +574,6 @@ def add_to_group_page(request, group_id: int):
             invented = Friends.objects.get(from_user_id=request.POST.get('invite'))
             invented = User.objects.get(id=invented.from_user_id)
             invented.members.add(context['group'])
-            return redirect('/group/add_to_group/' + str(context['group_id']))
+            return redirect('/groups/group/add_to_group/' + str(context['group_id']))
 
     return render(request, 'pages/groups/add_to_group.html', context)
