@@ -405,7 +405,7 @@ def get_friends(id: int):
     :param id: ID пользователя
     :return: Список друзей
     """
-    return Friends.objects.filter(to_user=User.objects.get(id=id), waiting=False)
+    return Friends.objects.filter(from_user=User.objects.get(id=id).id, waiting=False)
 
 
 @login_required
@@ -542,7 +542,7 @@ def add_to_group_page(request, group_id: int):
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
         return redirect('/groups/group/' + str(group_id))
 
-    friends = Friends.objects.filter(from_user_id=request.user)
+    friends = get_friends(request.user.id)
     friends_id = [friend.to_user_id for friend in friends]
     users_friends_all = User.objects.filter(id__in=friends_id)
 
