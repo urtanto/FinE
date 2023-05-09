@@ -54,3 +54,9 @@ class InterestsForm(forms.Form):
 
     Interests = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                           choices=OPTIONS)
+
+class CreateReportForm(forms.Form):
+    report_text = forms.CharField(max_length=1024)
+
+class VerifyReportForm(forms.Form):
+    answer_text = forms.CharField(max_length=1024, label="Напишите ответ на жалобу пользователя")

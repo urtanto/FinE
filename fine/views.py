@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.core.handlers.wsgi import WSGIRequest
@@ -8,8 +9,9 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 
-from fine.models import RegistrationEvents, User, Interests, Event, Friends
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends
+from fine.models import RegistrationEvents, User, Interests, Event, Friends, Report
+from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends, VerifyReportForm, \
+    CreateReportForm
 
 
 @register.filter
@@ -448,7 +450,7 @@ def friends_page(request: WSGIRequest):
     """
     Страница с друзьями пользователя
     """
-    context = get_context(request, "Friends", reverse("friends"))
+    context = get_context(request, "Друзья", reverse("friends"))
     context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False))
     context["friends_request_to_user"] = list(Friends.objects.filter(to_user=request.user, waiting=True))
     context["friends_request_by_user"] = list(Friends.objects.filter(from_user=request.user, waiting=True))
@@ -476,3 +478,77 @@ def friends_page(request: WSGIRequest):
         return redirect('/friends/')
 
     return render(request, 'pages/friends/friends.html', context)
+
+@login_required
+def report_page(request, report_id : int):
+    context = get_context(request, "Жалоба №"+str(report_id))
+
+    try:
+        if (Report.objects.get(id=report_id).author != request.user):
+            return redirect('my_profile/my_reports/')
+        context['report'] = Report.objects.get(id=report_id)
+        context['report_type'] = context['report'].type
+        context['id'] = report_id
+    except Report.DoesNotExist:
+        return redirect('my_profile/my_reports/')
+
+    return render(request, 'pages/reports/report.html', context)
+
+@login_required
+def create_report_page(request):
+    context = get_context(request, 'Создание жалобы')
+    context['form'] = CreateReportForm(request.POST) if request.method == 'POST' else CreateReportForm()
+
+    if request.method == 'POST':
+        if context['form'].is_valid():
+            rep = Report.objects.create(author=request.user, report_text=context['form'].cleaned_data['report_text'], type=1, created_at=datetime.datetime.now())
+            rep.save()
+            return redirect(reverse('report', kwargs={"report_id": rep.id}))
+
+    return render(request, 'pages/reports/create_report.html', context)
+
+@login_required
+def my_reports_page(request):
+    context = get_context(request, 'Мои жалобы')
+
+    try:
+        context['reports'] = Report.objects.filter(author=request.user)
+        context['reports_size'] = len(context['reports'])
+        context['waiting_reports'] = len(Report.objects.filter(author=request.user, type=2))
+    except Report.DoesNotExist:
+        context['reports_size'] = 0
+
+    return render(request, 'pages/reports/my_reports.html', context)
+
+@login_required
+def unverifed_reports_page(request):
+    if not request.user.is_superuser:
+        return redirect('/')
+    context = get_context(request, 'Проверка жалоб')
+
+    try:
+        context['reports'] = Report.objects.filter(type=1)
+        context['reports_size'] = len(context['reports'])
+    except Report.DoesNotExist:
+        context['reports_size'] = 0
+
+    return render(request, 'pages/reports/unverifed_reports.html',context)
+
+@login_required
+def verify_report_page(request, report_id):
+    context = get_context(request, "Жалоба №" + str(report_id))
+    context['form'] = VerifyReportForm(request.POST) if request.method == 'POST' else VerifyReportForm()
+
+
+    context['report'] = Report.objects.get(id=report_id)
+    context['id'] = report_id
+
+    if context['report'].type == 2:
+        return redirect('/verify_reports/')
+
+    if request.method == 'POST':
+        if context['form'].is_valid():
+            Report.objects.filter(id=report_id).update(closed_at=datetime.datetime.now(), answer_text=context['form'].cleaned_data['answer_text'], type=2)
+            return redirect('/verify_reports/')
+
+    return render(request, 'pages/reports/verify_report.html', context)

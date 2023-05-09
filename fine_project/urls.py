@@ -46,6 +46,11 @@ urlpatterns = [
     path('search_friends/', views.search_friends, name='search_friends'),
     path('friends_only/', views.friends_only_page, name='friends_only'),
     path('theme/change/', views.theme_change),
+    path('profile/my_reports/report/<int:report_id>', views.report_page, name='report'),
+    path('profile/my_reports/', views.my_reports_page, name='my_reports'),
+    path('profile/my_reports/create_report/', views.create_report_page, name='create_report'),
+    path('verify_reports/', views.unverifed_reports_page, name='uncheacked_reports'),
+    path('verify_reports/report/<int:report_id>', views.verify_report_page, name='verify_report'),
 ]
 
 if settings.DEBUG:
