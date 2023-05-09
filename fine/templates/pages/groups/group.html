@@ -38,6 +38,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
       </div>
       <div class="modal-body">
+          {% if users_size == 0 %}
+                    <p>В группе нет участников</p>
+          {% endif %}
         {% for member in users %}
         <div class="row">
           <div class="col-md-8 mx-auto">
@@ -75,6 +78,34 @@
   </div>
 </div>
 <hr>
+{% if user == group.founder %}
+<a type="button" class="d-grid gap-2 btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Удалить группу
+</a>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Удаление группы</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <p><strong>ВНИМАНИЕ!!!</strong></p>
+          <p>После нажатия на кнопку, группа будет навсегда удалена.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть окно</button>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" name="del" value="del">Удалить группу</button>
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+{% endif %}
 <a href="/groups/" class="d-grid gap-2 btn btn-primary" type="button">Группы</a>
 
 {% endblock %}

@@ -115,7 +115,7 @@ def index_page(request: WSGIRequest):
     """
     Функция, обрабатывающая запрос.
     """
-    context = get_context(request, "Simple voting", reverse("index"))
+    context = get_context(request, "FinE", reverse("index"))
     context["events"] = Event.objects.all()
     return render(request, 'pages/start/index.html', context)
 
@@ -520,10 +520,15 @@ def group_page(request, group_id: int):
     context = get_context(request, 'Group №' + str(group_id))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['users'] = User.objects.filter(members__id=group_id)
+    context['users_size'] = len(context['users'])
     context['user'] = request.user
 
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id and\
             group_id not in request.user.members.all().values_list('id', flat=True):
+        return redirect('/groups/')
+
+    if request.POST.get('del') == 'del':
+        context['group'].delete()
         return redirect('/groups/')
 
     return render(request, 'pages/groups/group.html', context)
