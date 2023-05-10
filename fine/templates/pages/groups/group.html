@@ -69,7 +69,7 @@
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 {% if user == group.founder %}
                   <a href="/groups/group/add_to_group/{{group.id}}" class="btn btn-primary" type="button">Добавить пользователя</a>
-                  <a href="#" class="btn btn-primary" type="button">Удалить пользователя</a>
+                  <a href="/groups/group/remove_from_the_group/{{group.id}}" class="btn btn-primary" type="button">Удалить пользователя</a>
                 {% endif %}
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
          </div>
