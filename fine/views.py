@@ -242,10 +242,10 @@ def profile_view_page(request: WSGIRequest, code: int):
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
-        context['interests'] = []  # интересы пользователя
-        Interests.objects.filter(user=code).values_list('interest', flat=True)
-        for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
-            context['interests'].append(INTERESTS[i])
+        #context['interests'] = []  # интересы пользователя
+        #Interests.objects.filter(user=code).values_list('interest', flat=True)
+        #for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
+        #    context['interests'].append(INTERESTS[i])
     except User.DoesNotExist as user_does_not_exist:
         context['events'] = None
         context['interests'] = None
@@ -399,13 +399,13 @@ def event_page(request: WSGIRequest, event_id: int):
     return render(request, 'pages/main/event.html', context)
 
 
-def get_friends(id: int):
+def get_friends(user_id: int):
     """
     Функция, возвращающая список друзей пользователя.
-    :param id: ID пользователя
+    :param user_id: ID пользователя
     :return: Список друзей
     """
-    return Friends.objects.filter(from_user=User.objects.get(id=id).id, waiting=False)
+    return Friends.objects.filter(from_user=User.objects.get(id=user_id).id, waiting=False)
 
 
 def friends_only_page(request):
@@ -448,6 +448,9 @@ def friends_page(request: WSGIRequest):
 
 @login_required
 def create_group_page(request):
+    """
+    Страница с созданием пользовательской группы
+    """
     context = get_context(request, "Create Group")
 
     if request.method == 'POST':
@@ -467,6 +470,9 @@ def create_group_page(request):
 
 @login_required
 def groups_page(request):
+    """
+    Страница со всеми пользовательскими группами пользователей
+    """
     context = get_context(request, "Groups")
     context['groups'] = request.user.members.all()
     context['groups_size'] = len(context['groups'])
@@ -478,6 +484,9 @@ def groups_page(request):
 
 @login_required
 def group_page(request, group_id: int):
+    """
+    Страница с пользовательской группой
+    """
     context = get_context(request, 'Group №' + str(group_id))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['users'] = User.objects.filter(members__id=group_id)
@@ -499,14 +508,26 @@ def group_page(request, group_id: int):
 
 
 class Search:
+    """
+    Класс для осуществления поиска
+    """
     def __init__(self, req):
+        """
+        Конструктор
+        """
         self.form = SearchFriends()
         self.request = req
 
     def reload(self, req):
+        """
+        Изменение параметра
+        """
         self.request = req
 
     def search(self):
+        """
+        Поиск
+        """
         self.form = SearchFriends(self.request.POST)
         if self.form.is_valid():
             search = self.form.cleaned_data['search']
@@ -515,20 +536,31 @@ class Search:
                             User.objects.filter(last_name__icontains=search) |
                             User.objects.filter(username__icontains=search))
             return users_search
-        else:
-            return User.objects.all()
+        return User.objects.all()
 
 
 class GetFriendsGroup:
+    """
+    Класс для получения группы друзей
+    """
     def __init__(self, req):
+        """
+        Конструктор
+        """
         self.request = req
 
     def get_friends_id(self):
+        """
+        Возвращает ID всех друзей
+        """
         friends = get_friends(self.get_my_user_id())
         friends_id = [friend.to_user_id for friend in friends]
         return friends_id
 
     def get_friends_request_id(self):
+        """
+        Возвращает ID запрашиваемых друзей
+        """
         friends = Friends.objects.filter(from_user=self.get_my_user_id())
         friends_to_id = [friend.to_user_id for friend in friends]
         friends = Friends.objects.filter(to_user=self.get_my_user_id())
@@ -538,11 +570,17 @@ class GetFriendsGroup:
 
     @staticmethod
     def get_friends_group_id(group_id):
+        """
+        Возвращает ID группы друзей
+        """
         friends_group = User.objects.filter(members__id=group_id)
         friends_group_id = [friend.id for friend in friends_group]
         return friends_group_id
 
     def get_my_user_id(self):
+        """
+        Возвращает ID пользователя
+        """
         return self.request.user.id
 
 
@@ -642,8 +680,8 @@ def remove_from_the_group_page(request, group_id: int):
 
     if request.method == 'POST':
         if request.POST.get('delete'):
-            us = User.objects.get(id=request.POST.get('delete'))
-            us.members.remove(group_id)
+            user_to_delete = User.objects.get(id=request.POST.get('delete'))
+            user_to_delete.members.remove(group_id)
             return redirect('/groups/group/remove_from_the_group/' + str(context['group_id']))
 
     return render(request, 'pages/groups/remove_from_the_group.html', context)

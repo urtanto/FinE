@@ -1,9 +1,8 @@
 from django import forms
-from django.forms import FileInput, TextInput
 
-from fine.models import User, Event, UserGroups
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
+from fine.models import User, Event
 
 
 class RegistrationForm(UserCreationForm):
@@ -57,5 +56,8 @@ class InterestsForm(forms.Form):
                                           choices=OPTIONS)
 
 class CreateGroup(forms.Form):
+    """
+    Форма для создания пользовательской группы
+    """
     title = forms.CharField(max_length=15, label='Название группы', help_text='')
     description = forms.CharField(max_length=255, label='Описание группы', help_text='')

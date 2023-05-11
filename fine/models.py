@@ -102,6 +102,9 @@ class Friends(models.Model):
 
 
 class UserGroups(models.Model):
+    """
+    Пользовательские группы
+    """
     title = models.CharField(max_length=15)
     description = models.CharField(max_length=255)
     founder = models.ForeignKey(get_user_model(), models.CASCADE, related_name='founder')
