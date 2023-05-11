@@ -1,7 +1,7 @@
 from django import forms
-
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
+
 from fine.models import User, Event
 
 
@@ -55,9 +55,14 @@ class InterestsForm(forms.Form):
     Interests = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                           choices=OPTIONS)
 
-class CreateGroup(forms.Form):
+class CreateReportForm(forms.Form):
     """
-    Форма для создания пользовательской группы
+    Форма для создания репорта
     """
-    title = forms.CharField(max_length=15, label='Название группы', help_text='')
-    description = forms.CharField(max_length=255, label='Описание группы', help_text='')
+    report_text = forms.CharField(max_length=1024)
+
+class VerifyReportForm(forms.Form):
+    """
+    Формя для ответа на репорт
+    """
+    answer_text = forms.CharField(max_length=1024, label="Напишите ответ на жалобу пользователя")
