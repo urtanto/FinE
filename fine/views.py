@@ -491,6 +491,9 @@ def group_page(request, group_id: int):
     if request.POST.get('del') == 'del':
         context['group'].delete()
         return redirect('/groups/')
+    if request.POST.get('del') == 'user':
+        context['user'].members.remove(context['group'])
+        return redirect('/groups/')
 
     return render(request, 'pages/groups/group.html', context)
 
