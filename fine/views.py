@@ -575,7 +575,7 @@ def search_friends(request):
 @login_required
 def add_to_group_page(request, group_id: int):
     """
-        Страница по добавлению пользователей в группу
+    Страница по добавлению пользователей в группу
     """
     context = get_context(request, 'Adding to Group №' + str(group_id))
     context['group'] = UserGroups.objects.get(id=group_id)

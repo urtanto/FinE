@@ -78,43 +78,41 @@
   </div>
 </div>
 <hr>
-<div class="row">
-    <div class="col-md-6 mx-auto">
-        <a href="/groups/" class="btn btn-primary btn-lg" type="button">Группы</a>
+<div class="d-grid gap-2 d-md-block">
+        <a href="/groups/" class="btn btn-primary" type="button">Группы</a>
         {% if user == group.founder %}
-        <a type="button" class="btn btn-lg btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          Удалить группу
-        </a>
+            <a type="button" class="btn btn-lg btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              Удалить группу
+            </a>
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Удаление группы</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <p><strong>ВНИМАНИЕ!!!</strong></p>
-                  <p>После нажатия на кнопку, группа будет навсегда удалена.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть окно</button>
-                  <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger" name="del" value="del">Удалить группу</button>
-                  </form>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Удаление группы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      <p><strong>ВНИМАНИЕ!!!</strong></p>
+                      <p>После нажатия на кнопку, группа будет навсегда удалена.</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть окно</button>
+                      <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" name="del" value="del">Удалить группу</button>
+                      </form>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
         {% endif %}
-        {% if user != group.founder %}
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-lg btn-danger" name="del" value="user">Покинуть группу</button>
-        </form>
-        {% endif %}
-    </div>
-</div>
 
+        {% if user != group.founder %}
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" name="del" value="user">Покинуть группу</button>
+            </form>
+        {% endif %}
+</div>
 {% endblock %}
