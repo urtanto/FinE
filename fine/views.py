@@ -551,7 +551,6 @@ def search_friends(request):
     context = get_context(request, "Search friends", reverse("search_friends"))
     get_friends_group = GetFriendsGroup(request)
     find = Search(request)
-    users_friends_from = User.objects.exclude(id__in=get_friends_group.get_friends_request_id())
     users_friends = User.objects.exclude(id__in=get_friends_group.get_friends_request_id())
     my_user = User.objects.exclude(id=get_friends_group.get_my_user_id())
     context['users'] = User.objects.all() & users_friends & my_user
@@ -572,6 +571,9 @@ def search_friends(request):
 
 @login_required
 def add_to_group_page(request, group_id: int):
+    """
+        Страница по добавлению пользователей в группу
+    """
     context = get_context(request, 'Adding to Group №' + str(group_id))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
@@ -593,9 +595,8 @@ def add_to_group_page(request, group_id: int):
 
     if request.method == 'POST':
         find.reload(request)
-        if find.form.is_valid():
-            context['users'] = find.search() & users_to_invite
-            context['users_size'] = len(context['users'])
+        context['users'] = find.search() & users_to_invite
+        context['users_size'] = len(context['users'])
     context['form'] = find.form
 
     if request.method == 'POST':
@@ -610,6 +611,9 @@ def add_to_group_page(request, group_id: int):
 
 @login_required
 def remove_from_the_group_page(request, group_id: int):
+    """
+    Страница по удалению пользователей из группы
+    """
     context = get_context(request, 'Remove from the group №' + str(group_id))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
