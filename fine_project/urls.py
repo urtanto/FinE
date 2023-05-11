@@ -1,4 +1,4 @@
-"""fine_project URL Configuration
+"""djangoProject URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.1/topics/http/urls/
@@ -45,6 +45,12 @@ urlpatterns = [
     path('friends/', views.friends_page, name='friends'),
     path('search_friends/', views.search_friends, name='search_friends'),
     path('friends_only/', views.friends_only_page, name='friends_only'),
+    path('groups/create_group/', views.create_group_page, name='create_group'),
+    path('groups/', views.groups_page, name='groups'),
+    path('groups/group/<int:group_id>', views.group_page, name='group'),
+    path('groups/group/add_to_group/<int:group_id>', views.add_to_group_page, name='add_to_group'),
+    path('groups/group/remove_from_the_group/<int:group_id>',
+         views.remove_from_the_group_page, name='remove_from_the_group'),
     path('theme/change/', views.theme_change),
 ]
 

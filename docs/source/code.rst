@@ -5,5 +5,5 @@ Code reference
 Модели django
 -------------
 
-.. automodule:: fine.models
+.. automodule:: fine.views
    :members:
