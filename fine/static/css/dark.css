@@ -57,10 +57,12 @@
 
 .dark .btn-outline-primary {
     border-color: #8b00ff;
+    color: #8b00ff;
 }
 
 .dark .btn-outline-primary:hover {
     background-color: #8b00ff;
+    color: #FFFFFF;
 }
 
 .dark .myform-color > div > input,
@@ -75,7 +77,15 @@ html.dark {
     --scrollbarThumb: rgba(255, 255, 255, 0.5);
 }
 
+.dark .modal-body {
+    background-color: #000033;
+}
+
+
 .dark .card,
-.dark .card > ul > li {
+.dark .card > ul > li,
+.dark .modal-content,
+.dark .modal-header,
+.dark .modal-footer{
     background-color: #273247;
 }

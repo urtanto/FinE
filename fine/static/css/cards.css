@@ -28,14 +28,6 @@
     margin-bottom: -2px;
 }
 
-.center-message {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-}
-
 .myform {
     display: flex;
     flex-wrap: wrap;
