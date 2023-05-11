@@ -76,6 +76,7 @@ class Report(models.Model):
     """
     Класс репорта
     """
+
     class Type(models.IntegerChoices):
         """
         Закрыт репорт или нет
