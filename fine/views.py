@@ -408,45 +408,6 @@ def get_friends(id: int):
     return Friends.objects.filter(from_user=User.objects.get(id=id).id, waiting=False)
 
 
-@login_required
-def search_friends(request):
-    """
-    Страница по поиску людей
-    """
-    context = get_context(request, "Search friends", reverse("search_friends"))
-    context['users'] = User.objects.all()
-    context['users_size'] = 0
-    if request.method == 'POST':
-        form = SearchFriends(request.POST)
-        if form.is_valid():
-            search = form.cleaned_data['search']
-            friends = get_friends(request.user.id)
-            friends_id = [friend.to_user_id for friend in friends]
-
-            users_search = (User.objects.filter(first_name__icontains=search) |
-                            User.objects.filter(last_name__icontains=search) |
-                            User.objects.filter(username__icontains=search))
-
-            my_user = User.objects.exclude(id=request.user.id)
-
-            users_friends = User.objects.exclude(id__in=friends_id)
-
-            users = users_search & my_user & users_friends
-            context['users'] = users
-            context['users_size'] = len(users)
-        else:
-            pass
-    else:
-        form = SearchFriends()
-
-    if request.POST.get('friend_button'):
-        Friends.objects.create(from_user=request.user,
-                               to_user=User.objects.get(id=request.POST.get('friend_button')), waiting=True)
-
-    context['form'] = form
-    return render(request, 'pages/friends/search_friends.html', context)
-
-
 def friends_only_page(request):
     """
     Страница только с друзьями пользователя
@@ -551,6 +512,8 @@ class Search:
                             User.objects.filter(last_name__icontains=search) |
                             User.objects.filter(username__icontains=search))
             return users_search
+        else:
+            return User.objects.all()
 
 
 class GetFriendsGroup:
@@ -562,6 +525,14 @@ class GetFriendsGroup:
         friends_id = [friend.to_user_id for friend in friends]
         return friends_id
 
+    def get_friends_request_id(self):
+        friends = Friends.objects.filter(from_user=self.get_my_user_id())
+        friends_to_id = [friend.to_user_id for friend in friends]
+        friends = Friends.objects.filter(to_user=self.get_my_user_id())
+        friends_from_id = [friend.from_user_id for friend in friends]
+        friends_id = friends_to_id + friends_from_id
+        return friends_id
+
     @staticmethod
     def get_friends_group_id(group_id):
         friends_group = User.objects.filter(members__id=group_id)
@@ -570,6 +541,33 @@ class GetFriendsGroup:
 
     def get_my_user_id(self):
         return self.request.user.id
+
+
+@login_required
+def search_friends(request):
+    """
+    Страница по поиску людей
+    """
+    context = get_context(request, "Search friends", reverse("search_friends"))
+    get_friends_group = GetFriendsGroup(request)
+    find = Search(request)
+    users_friends_from = User.objects.exclude(id__in=get_friends_group.get_friends_request_id())
+    users_friends = User.objects.exclude(id__in=get_friends_group.get_friends_request_id())
+    my_user = User.objects.exclude(id=get_friends_group.get_my_user_id())
+    context['users'] = User.objects.all() & users_friends & my_user
+    context['users_size'] = len(context['users'])
+    if request.method == 'POST':
+        find.reload(request)
+        users = find.search() & my_user & users_friends
+        context['users'] = users
+        context['users_size'] = len(users)
+    context['form'] = find.form
+    if request.POST.get('friend_button'):
+        Friends.objects.create(from_user=request.user,
+                               to_user=User.objects.get(id=request.POST.get('friend_button')), waiting=True)
+        return redirect('/search_friends/')
+
+    return render(request, 'pages/friends/search_friends.html', context)
 
 
 @login_required
@@ -637,8 +635,8 @@ def remove_from_the_group_page(request, group_id: int):
 
     if request.method == 'POST':
         if request.POST.get('delete'):
-            invented = User.objects.get(members__id=group_id, user_id=request.POST.get('delete')),
-            invented.members.delete()
+            us = User.objects.get(id=request.POST.get('delete'))
+            us.members.remove(group_id)
             return redirect('/groups/group/remove_from_the_group/' + str(context['group_id']))
 
     return render(request, 'pages/groups/remove_from_the_group.html', context)

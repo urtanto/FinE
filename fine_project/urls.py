@@ -49,6 +49,8 @@ urlpatterns = [
     path('groups/', views.groups_page, name='groups'),
     path('groups/group/<int:group_id>', views.group_page, name='group'),
     path('groups/group/add_to_group/<int:group_id>', views.add_to_group_page, name='add_to_group'),
+    path('groups/group/remove_from_the_group/<int:group_id>',
+         views.remove_from_the_group_page, name='remove_from_the_group'),
     path('theme/change/', views.theme_change),
 ]
 

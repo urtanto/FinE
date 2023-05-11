@@ -10,7 +10,7 @@
 {% if users_size == 0 %}
 <h1>Некого пригласить в группу</h1>
 {% endif %}
-<form method="post" action="{% url 'add_to_group'  group_id %}">
+<form method="post" action="{% url 'remove_from_the_group'  group_id %}">
         {% csrf_token %}
         {% bootstrap_form form %}
         <button type="submit" class="btn btn-primary float-right btn-block">Поиск</button>
