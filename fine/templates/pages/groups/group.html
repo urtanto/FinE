@@ -41,9 +41,30 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    {% if users_size == 0 %}
-                        <p>В группе нет участников</p>
-                    {% endif %}
+                    <div class="col-md-8 mx-auto">
+                                <div class="card" style="width: 18rem;">
+                                    {% if user.avatar %}
+                                        <img class="card-img-top" src="{{ user.avatar.url }}" alt="Card image cap">
+                                    {% endif %}
+                                    {% if not user.avatar %}
+                                        <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                             alt="Card image cap">
+                                    {% endif %}
+
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ user.username }}</h5>
+                                        <p class="card-text">{{ user.first_name }} {{ user.last_name }}</p>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <a href="/profile/{{ user.id }}" class="btn btn-primary"
+                                           type="button">Профиль</a>
+                                    </div>
+                                    <div class="card-footer text-body-secondary">
+                                        Создатель группы
+                                    </div>
+                                </div>
+                            </div>
                     {% for member in users %}
                         <div class="row">
                             <div class="col-md-8 mx-auto">
