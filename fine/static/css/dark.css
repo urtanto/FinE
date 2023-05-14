@@ -3,6 +3,11 @@
     opacity: 1;
 }
 
+.dark .index-gradient {
+    background-image: radial-gradient(circle, #FF6700 0%, #8b00ff 100%);
+    /*opacity: 1;*/
+}
+
 .dark .mycontainer {
     background-color: rgba(0, 0, 0, 0.75);
 }
@@ -27,6 +32,32 @@
 .dark .mycard {
     background-color: #273247;
     border-color: #333333;
+}
+.dark .dark-mycard {
+    background-color: #000000;
+    border-color: #FF6700;
+    color: #FFFFFF;
+}
+
+.dark .event-gradient{
+    background-image: linear-gradient(45deg, #8b00ff 0%, #FF6700 100%);
+}
+.dark .event,
+.dark .event > img {
+    background-color: #000000;
+    border-color: #FF6700;
+}
+.dark .event .list-group,
+.dark .event .list-group-item{
+    background-color: #000000;
+}
+
+.dark .event-button {
+    background-color: #8b00ff;
+}
+
+.dark .event-button:hover {
+    background-color: #FF6700;
 }
 
 .dark .mycard > img {
@@ -65,6 +96,12 @@
     color: #FFFFFF;
 }
 
+.dark .outline:hover {
+    color: #FFFFFF;
+    background-color: var(--backgroung-color);
+    border-color: var(--backgroung-color);
+}
+
 .dark .myform-color > div > input,
 .dark .myform-color > div > select,
 .dark .myform-color > div > select > option {
@@ -86,6 +123,21 @@ html.dark {
 .dark .card > ul > li,
 .dark .modal-content,
 .dark .modal-header,
-.dark .modal-footer{
+.dark .modal-footer {
     background-color: #273247;
+}
+
+
+.dark .myprimary {
+    --backgroung-color: #8b00ff;
+    background-color: var(--backgroung-color);
+    color: #FFFFFF;
+}
+
+.dark .outline{
+    padding: 8px 13px;
+    background: none;
+    color: var(--backgroung-color);
+    border: 2px solid;
+    font-weight: bold;
 }

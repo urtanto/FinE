@@ -24,7 +24,6 @@ from fine.views import get_context
 
 context_for_login = get_context(page_name="Авторизация", active="/login/")
 context_for_login["menu"]["right"]["unauthorized"][1] = {'url_name': '/login/', 'name': 'Войти'}
-
 urlpatterns = [
     path('', views.index_page, name='index'),
     path('admin/', admin.site.urls),
@@ -34,11 +33,12 @@ urlpatterns = [
              extra_context=context_for_login
          ),
          name='login'),
+    path('registration/', views.registration_page, name='register'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('menu/', views.menu_page, name='menu'),
     path('menu/event/create/', views.event_create_page, name='event_create'),
     path('menu/event/edit/<int:event_id>', views.event_edit_page, name='event_edit'),
     path('menu/event/commit/<int:event_id>', views.commit_event_page, name='event_commit'),
-    path('registration/', views.registration_page, name='register'),
     path('profile/edit/about', views.edit_page, name='edition_about'),
     path('profile/edit/interests', views.edit_interests_page, name='edition_interests'),
     path('menu/event/<int:event_id>', views.event_page, name='event'),

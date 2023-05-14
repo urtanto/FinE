@@ -72,7 +72,7 @@ def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
             "left": {
                 "unauthorized": [
                     {'url_name': '/', 'name': 'Главная страница'},
-                    {'url_name': '/', 'name': 'Меню'},
+                    {'url_name': '/menu/', 'name': 'Меню'},
                 ],
             },
             "right": {
@@ -88,11 +88,12 @@ def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
     if request.user.is_authenticated:
         data["menu"]["left"]["authorized"] = [
             {'url_name': reverse('index'), 'name': 'Главная страница'},
-            {'url_name': reverse('index'), 'name': 'Меню'},
+            {'url_name': reverse('menu'), 'name': 'Меню'},
             {'url_name': reverse('friends'), 'name': 'Друзья'},
             {'url_name': reverse('search_friends'), 'name': 'Найти друга'},
         ]
         data["menu"]["right"]["authorized"] = [
+            {'url_name': reverse('groups'), 'name': 'Группы'},
             {'url_name': reverse('profile', kwargs={'code': request.user.id}), 'name': 'Профиль'},
             {'url_name': reverse('logout'), 'name': 'Выйти', "button-style": "btn-outline-primary"},
         ]
@@ -116,6 +117,15 @@ def index_page(request: WSGIRequest):
     Функция, обрабатывающая запрос.
     """
     context = get_context(request, "FinE", reverse("index"))
+    context["events"] = list(Event.objects.all()) * 3
+    return render(request, 'pages/start/index.html', context)
+
+
+def menu_page(request: WSGIRequest):
+    """
+    Функция, обрабатывающая запрос.
+    """
+    context = get_context(request, "FinE", reverse("menu"))
     context["events"] = Event.objects.all()
     return render(request, 'pages/start/index.html', context)
 
@@ -242,9 +252,9 @@ def profile_view_page(request: WSGIRequest, code: int):
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
-        #context['interests'] = []  # интересы пользователя
-        #Interests.objects.filter(user=code).values_list('interest', flat=True)
-        #for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
+        # context['interests'] = []  # интересы пользователя
+        # Interests.objects.filter(user=code).values_list('interest', flat=True)
+        # for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
         #    context['interests'].append(INTERESTS[i])
     except User.DoesNotExist as user_does_not_exist:
         context['events'] = None
@@ -451,7 +461,7 @@ def create_group_page(request):
     """
     Страница с созданием пользовательской группы
     """
-    context = get_context(request, "Create Group")
+    context = get_context(request, "Create Group", reverse('groups'))
 
     if request.method == 'POST':
         form = CreateGroup(request.POST)
@@ -473,7 +483,7 @@ def groups_page(request):
     """
     Страница со всеми пользовательскими группами пользователей
     """
-    context = get_context(request, "Groups")
+    context = get_context(request, "Groups", reverse('groups'))
     context['groups'] = request.user.members.all()
     context['groups_size'] = len(context['groups'])
     context['my_groups'] = UserGroups.objects.filter(founder=request.user)
@@ -487,7 +497,7 @@ def group_page(request, group_id: int):
     """
     Страница с пользовательской группой
     """
-    context = get_context(request, 'Group №' + str(group_id))
+    context = get_context(request, 'Group №' + str(group_id), reverse('groups'))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['users'] = User.objects.filter(members__id=group_id)
     context['user'] = request.user
@@ -510,6 +520,7 @@ class Search:
     """
     Класс для осуществления поиска
     """
+
     def __init__(self, req):
         """
         Конструктор
@@ -542,6 +553,7 @@ class GetFriendsGroup:
     """
     Класс для получения группы друзей
     """
+
     def __init__(self, req):
         """
         Конструктор
@@ -614,7 +626,7 @@ def add_to_group_page(request, group_id: int):
     """
     Страница по добавлению пользователей в группу
     """
-    context = get_context(request, 'Adding to Group №' + str(group_id))
+    context = get_context(request, 'Adding to Group №' + str(group_id), reverse('groups'))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
 
@@ -654,7 +666,7 @@ def remove_from_the_group_page(request, group_id: int):
     """
     Страница по удалению пользователей из группы
     """
-    context = get_context(request, 'Remove from the group №' + str(group_id))
+    context = get_context(request, 'Remove from the group №' + str(group_id), reverse('groups'))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
 

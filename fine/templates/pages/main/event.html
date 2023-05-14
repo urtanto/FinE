@@ -54,7 +54,8 @@
                                                     <h5 class="card-title"
                                                         style="height: 100%; margin: 0; text-align: start;">
                                                         {{ user.first_name }} {{ user.last_name }} <a
-                                                            href="{% url 'profile' code=user.id %}">@{{ user.username }}</a>
+                                                            href="{% url 'profile' code=user.id %}"
+                                                            class="card-link">@{{ user.username }}</a>
                                                     </h5>
                                                 </div>
                                             </div>
