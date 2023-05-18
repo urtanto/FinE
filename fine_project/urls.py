@@ -52,6 +52,11 @@ urlpatterns = [
     path('groups/group/remove_from_the_group/<int:group_id>',
          views.remove_from_the_group_page, name='remove_from_the_group'),
     path('theme/change/', views.theme_change),
+    path('profile/my_reports/report/<int:report_id>', views.report_page, name='report'),
+    path('profile/my_reports/', views.my_reports_page, name='my_reports'),
+    path('profile/my_reports/create_report/', views.create_report_page, name='create_report'),
+    path('verify_reports/', views.unverifed_reports_page, name='uncheacked_reports'),
+    path('verify_reports/report/<int:report_id>', views.verify_report_page, name='verify_report'),
 ]
 
 if settings.DEBUG:

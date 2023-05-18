@@ -61,3 +61,16 @@ class CreateGroup(forms.Form):
     """
     title = forms.CharField(max_length=15, label='Название группы', help_text='')
     description = forms.CharField(max_length=255, label='Описание группы', help_text='')
+
+
+class CreateReportForm(forms.Form):
+    """
+    Форма для создания репорта
+    """
+    report_text = forms.CharField(max_length=1024)
+
+class VerifyReportForm(forms.Form):
+    """
+    Формя для ответа на репорт
+    """
+    answer_text = forms.CharField(max_length=1024, label="Напишите ответ на жалобу пользователя")
