@@ -51,7 +51,7 @@ class Event(models.Model):
     status = models.BooleanField(default=True)  # False - Close, True - Active
     start_day = models.DateField()
     finish_day = models.DateField()
-    description = models.CharField(max_length=255)
+    description = models.TextField()
     entertainment_type = models.IntegerField(choices=EntertainmentType.choices)
     author = models.ForeignKey(get_user_model(), models.CASCADE)
 

@@ -389,7 +389,6 @@ def event_page(request: WSGIRequest, event_id: int):
     try:
         event: Event = list(Event.objects.filter(id=int(event_id)))[0]
         if request.method == 'POST':
-            print("*click*")
             data = json.loads(request.body)
             if data["going"]:
                 RegistrationEvents.objects.get(event=event, user=request.user).delete()
@@ -399,7 +398,6 @@ def event_page(request: WSGIRequest, event_id: int):
         people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=event_id))
         friends: list[User] = list(map(get_user, friends))
         people: list[User] = list(map(get_user, people))
-        event.description = "adada "
         context['event'] = event
         context['friends'] = friends
         context['people'] = people

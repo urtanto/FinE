@@ -56,6 +56,11 @@
                                 href="{% url 'profile' code=event.author.id %}"
                                 class="card-link">@{{ event.author.username }}</a></h6></li>
                 </ul>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description }}
+                    </li>
+                </ul>
                 <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
             </div>
         {% endfor %}
