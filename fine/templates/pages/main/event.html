@@ -16,7 +16,9 @@
                             <h6>
                                 {{ event.author.first_name }} {{ event.author.last_name }} <a
                                     href="{% url 'profile' code=event.author.id %}"
-                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                                    class="card-link">@{{ event.author.username }}</a>
+                            </h6>
+                        </li>
                     </ul>
                     <ul class="list-group list-group-flush" style="overflow-y: auto;">
                         <li class="list-group-item">{{ event.description }}</li>
@@ -54,7 +56,8 @@
                                                     <h5 class="card-title"
                                                         style="height: 100%; margin: 0; text-align: start;">
                                                         {{ user.first_name }} {{ user.last_name }} <a
-                                                            href="{% url 'profile' code=user.id %}">@{{ user.username }}</a>
+                                                            href="{% url 'profile' code=user.id %}"
+                                                            class="card-link">@{{ user.username }}</a>
                                                     </h5>
                                                 </div>
                                             </div>
