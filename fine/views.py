@@ -244,9 +244,9 @@ def profile_view_page(request: WSGIRequest, code: int):
     try:
         context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
         context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
-        #context['interests'] = []  # интересы пользователя
-        #Interests.objects.filter(user=code).values_list('interest', flat=True)
-        #for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
+        # context['interests'] = []  # интересы пользователя
+        # Interests.objects.filter(user=code).values_list('interest', flat=True)
+        # for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
         #    context['interests'].append(INTERESTS[i])
     except User.DoesNotExist as user_does_not_exist:
         context['events'] = None
@@ -512,6 +512,7 @@ class Search:
     """
     Класс для осуществления поиска
     """
+
     def __init__(self, req):
         """
         Конструктор
@@ -544,6 +545,7 @@ class GetFriendsGroup:
     """
     Класс для получения группы друзей
     """
+
     def __init__(self, req):
         """
         Конструктор
@@ -687,12 +689,13 @@ def remove_from_the_group_page(request, group_id: int):
 
     return render(request, 'pages/groups/remove_from_the_group.html', context)
 
+
 @login_required
-def report_page(request, report_id : int):
+def report_page(request, report_id: int):
     """
     Страница с репортом
     """
-    context = get_context(request, "Жалоба №"+str(report_id))
+    context = get_context(request, "Жалоба №" + str(report_id))
 
     try:
         if Report.objects.get(id=report_id).author != request.user:
@@ -704,6 +707,7 @@ def report_page(request, report_id : int):
         return redirect('my_profile/my_reports/')
 
     return render(request, 'pages/reports/report.html', context)
+
 
 @login_required
 def create_report_page(request):
@@ -723,6 +727,7 @@ def create_report_page(request):
 
     return render(request, 'pages/reports/create_report.html', context)
 
+
 @login_required
 def my_reports_page(request):
     """
@@ -739,6 +744,7 @@ def my_reports_page(request):
 
     return render(request, 'pages/reports/my_reports.html', context)
 
+
 @login_required
 def unverifed_reports_page(request):
     """
@@ -754,7 +760,8 @@ def unverifed_reports_page(request):
     except Report.DoesNotExist:
         context['reports_size'] = 0
 
-    return render(request, 'pages/reports/unverifed_reports.html',context)
+    return render(request, 'pages/reports/unverifed_reports.html', context)
+
 
 @login_required
 def verify_report_page(request, report_id):
