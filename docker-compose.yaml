@@ -14,8 +14,8 @@ services:
     image: urtanto/fine:latest
     hostname: back
     volumes:
-      - 'fine_media:/media'
-      - 'fine_static:/fine/static'
+      - '/var/media:/media'
+      - '/var/static:/fine/static'
     ports:
       - "8001:8000"
     links:
@@ -24,5 +24,3 @@ services:
       - db
 volumes:
   fine_db:
-  fine_media:
-  fine_static:
