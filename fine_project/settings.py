@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-@9b_x4t*d+ck!d9zgo%fr^-(l$!)6-@bnka(&#ex83%xpc!g6s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("debug", True)
+DEBUG = False if os.environ.get("debug", True) == "False" else True
 
 ALLOWED_HOSTS = [
     "fine.stylelifeweb.su",
