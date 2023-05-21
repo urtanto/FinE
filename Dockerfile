@@ -5,7 +5,7 @@ RUN mkdir proj
 WORKDIR /proj
 
 ENV PYTHONUNBUFFERED 1
-ENV Server_starts "true"
+ENV debug "False"
 
 COPY requirements.txt /proj/
 RUN pip install -r requirements.txt
