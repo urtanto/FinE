@@ -119,7 +119,7 @@ def index_page(request: WSGIRequest):
     Функция, обрабатывающая запрос.
     """
     context = get_context(request, "FinE", reverse("index"))
-    context["events"] = list(Event.objects.all()) * 3
+    context["events"] = list(Event.objects.all())[: 3]
     return render(request, 'pages/start/index.html', context)
 
 
