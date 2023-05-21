@@ -7,11 +7,8 @@ WORKDIR /proj
 ENV PYTHONUNBUFFERED 1
 ENV Server_starts "true"
 
-RUN apt update
-
-ADD requirements.txt /proj/
+COPY requirements.txt /proj/
 RUN pip install -r requirements.txt
-#dckr_pat_JTOIVXpL1XfDLpg0WwqwsW2FXa0
-ADD . /proj/
+COPY . /proj/
 
 ENTRYPOINT ./start.sh
