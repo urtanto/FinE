@@ -131,6 +131,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'fine/static'),
 ]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+try:
+    STATIC_ROOT = "/var/static"
+except Exception:
+    pass
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
