@@ -44,7 +44,7 @@
                     <div class="col-md-8 mx-auto">
                                 <div class="card" style="width: 18rem;">
                                     {% if group.founder.avatar %}
-                                        <img class="card-img-top" src="{{ user.avatar.url }}" alt="Card image cap">
+                                        <img class="card-img-top" src="{{ group.founder.avatar.url }}" alt="Card image cap">
                                     {% endif %}
                                     {% if not group.founder.avatar %}
                                         <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"

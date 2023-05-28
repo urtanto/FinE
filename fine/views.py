@@ -139,7 +139,7 @@ def index_page(request: WSGIRequest):
     Главная страница сайта
     """
     context = get_context(request, "Wellcome", reverse("index"))
-    context["events"] = list(Event.objects.all())[: 3]
+    context["events"] = list(Event.objects.filter(type=1))[: 3]
     return render(request, 'pages/start/index.html', context)
 
 
