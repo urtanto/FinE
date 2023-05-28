@@ -19,7 +19,7 @@
                       <th scope="row">{{report.id}}</th>
                       <td>{{report.created_at}}</td>
                       <td>{{report.author}}</td>
-                        <td><a href="report/{{report.id}}" class="btn btn-primary float-right btn-block">Проверить</a></td>
+                        <td><a href="{% url 'verify_report' report.id %}" class="btn btn-primary float-right btn-block">Проверить</a></td>
                     </tr>
                 {% endfor %}
             </tbody>

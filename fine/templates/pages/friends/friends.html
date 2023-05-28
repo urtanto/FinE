@@ -132,8 +132,8 @@
                 <div class="card-around">
                     {% for i in friends_request_by_user %}
                         <div class="mycard">
-                            {% if i.from_user.avatar %}
-                                <img src="{{ i.from_user.avatar.url }}" alt="Card image cap">
+                            {% if i.to_user.avatar %}
+                                <img src="{{ i.to_user.avatar.url }}" alt="Card image cap">
                             {% else %}
                                 <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
                                      alt="Card image cap">

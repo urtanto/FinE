@@ -27,37 +27,37 @@
     <hr>
 
     <div class="d-grid gap-2 col-6 mx-auto">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModalScrollable">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalScrollable">
             Показать список участников
         </button>
     </div>
 
-    <div class="modal fade" id="exampleModalScrollable" tabindex="-1" aria-labelledby="exampleModalScrollableTitle"
+    <div class="modal fade" id="ModalScrollable" tabindex="-1" aria-labelledby="ModalScrollableTitle"
          style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalScrollableTitle">Список участников группы</h5>
+                    <h5 class="modal-title" id="ModalScrollableTitle">Список участников группы</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
                     <div class="col-md-8 mx-auto">
                                 <div class="card" style="width: 18rem;">
-                                    {% if user.avatar %}
+                                    {% if group.founder.avatar %}
                                         <img class="card-img-top" src="{{ user.avatar.url }}" alt="Card image cap">
                                     {% endif %}
-                                    {% if not user.avatar %}
+                                    {% if not group.founder.avatar %}
                                         <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
                                              alt="Card image cap">
                                     {% endif %}
 
                                     <div class="card-body">
-                                        <h5 class="card-title">{{ user.username }}</h5>
-                                        <p class="card-text">{{ user.first_name }} {{ user.last_name }}</p>
+                                        <h5 class="card-title">{{ group.founder.username }}</h5>
+                                        <p class="card-text">{{ group.founder.first_name }} {{ group.founder.last_name }}</p>
                                     </div>
 
                                     <div class="card-body">
-                                        <a href="/profile/{{ user.id }}" class="btn btn-primary"
+                                        <a href="/profile/{{ group.founder.id }}" class="btn btn-primary"
                                            type="button">Профиль</a>
                                     </div>
                                     <div class="card-footer text-body-secondary">
@@ -107,18 +107,17 @@
     </div>
     <hr>
     <div class="d-grid gap-2 d-md-block">
-        <a href="/groups/" class="btn btn-primary" type="button">Группы</a>
         {% if user == group.founder %}
-            <a type="button" class="btn btn-lg btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <a type="button" class="btn btn-lg btn-danger" data-bs-toggle="modal" data-bs-target="#Modal">
                 Удалить группу
             </a>
 
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            <div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="ModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Удаление группы</h5>
+                            <h5 class="modal-title" id="ModalLabel">Удаление группы</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">

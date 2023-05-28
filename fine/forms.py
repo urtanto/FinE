@@ -12,56 +12,70 @@ class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
     class Meta:
+        """
+        fields:
+        :param username: Никнейм пользователя
+        :param first_name: Имя
+        :param last_name: Фамилия
+        :param email: Электронная почта
+        """
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
 
 
 class CreateEvent(ModelForm):
     """
-    Форма создания ивента.
+    Форма создания мероприятия
     """
 
     class Meta:
+        """
+        :param name: Название мероприятия
+        :param type: Тип (Открытое/Закрытое) мероприятия
+        :param address: Адрес проведения мероприятия
+        :param start_day: Дата начала мероприятия
+        :param finish_day: Дата окончания мероприятия
+        :param description: Описание мероприятия
+        :param entertainment_type: Тип развлечений мероприятия
+        """
         model = Event
         fields = ['name', 'type', 'address', 'start_day', 'finish_day', 'description', 'entertainment_type']
 
 
 class EditProfile(forms.ModelForm):
     """
-    Форма для изменения основных данных профиля пользователя.
+    Форма для изменения основных данных профиля пользователя
     """
 
     class Meta:
+        """
+        :param username: Никнейм пользователя
+        :param first_name: Имя
+        :param last_name: Фамилия
+        :param email: Электронная почта
+        :param avatar: Фото
+        """
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'phone_number', 'avatar']
+        fields = ['username', 'first_name', 'last_name', 'email', 'avatar']
 
 
 class SearchFriends(forms.Form):
     """
-    Форма для поиска друзей.
-    """
-    search = forms.CharField(max_length=255)
+    Форма поиска друзей
 
-
-class InterestsForm(forms.Form):
+    :param search: Текст, по которому будет идти поиск :class:`django.forms.CharField`
     """
-    Форма для изменения интересов пользователя.
-    """
-    OPTIONS = ((0, 'Спорт'),
-               (1, 'Квесты'),
-               (2, 'Видеоигры'),
-               (3, 'Фильмы'))
-
-    Interests = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
-                                          choices=OPTIONS)
+    search = forms.CharField(max_length=255, label='Введите имя пользователя')
 
 class CreateGroup(forms.Form):
     """
-    Форма для создания пользовательской группы
+    Форма создания пользовательской группы
+
+    :param title: Название группы :class:`django.forms.CharField`
+    :param description: Описание группы :class:`django.forms.CharField`
     """
     title = forms.CharField(max_length=15, label='Название группы', help_text='')
     description = forms.CharField(max_length=255, label='Описание группы', help_text='')
-
 
 class CreateReportForm(forms.Form):
     """

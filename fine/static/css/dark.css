@@ -33,22 +33,25 @@
     background-color: #273247;
     border-color: #333333;
 }
+
 .dark .dark-mycard {
     background-color: #000000;
     border-color: #FF6700;
     color: #FFFFFF;
 }
 
-.dark .event-gradient{
+.dark .event-gradient {
     background-image: linear-gradient(45deg, #8b00ff 0%, #FF6700 100%);
 }
+
 .dark .event,
 .dark .event > img {
     background-color: #000000;
     border-color: #FF6700;
 }
+
 .dark .event .list-group,
-.dark .event .list-group-item{
+.dark .event .list-group-item {
     background-color: #000000;
 }
 
@@ -64,9 +67,9 @@
     border-color: #333333;
 }
 
+.dark .myform-color > .profile-info-box > p > input,
 .dark .card-link {
     color: #8b00ff;
-    font-weight: 800;
 }
 
 .dark .btn-primary {
@@ -102,14 +105,16 @@
     border-color: var(--backgroung-color);
 }
 
+.dark .myform-color > .profile-info-box > h1 > input,
+.dark .myform-color > .profile-info-box > h5 > input,
 .dark .myform-color > div > input,
 .dark .myform-color > div > select,
-.dark .myform-color > div > select > option {
+.dark .myform-color > div > select > option,
+.dark .myform-color > div > textarea {
     color: #000000;
 }
 
-
-html.dark {
+.dark * {
     --scrollbarBg: linear-gradient(180deg, #8b00ff 0%, #c8328a 50%, #8b00ff 100%);
     --scrollbarThumb: rgba(255, 255, 255, 0.5);
 }
@@ -134,7 +139,7 @@ html.dark {
     color: #FFFFFF;
 }
 
-.dark .outline{
+.dark .outline {
     padding: 8px 13px;
     background: none;
     color: var(--backgroung-color);

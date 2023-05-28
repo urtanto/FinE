@@ -8,21 +8,20 @@ class EntertainmentType(models.IntegerChoices):
     Типы интересов
     """
     SPORT = 0
-    QUEST = 1
+    MEETING = 1
     GAME = 2
-    FILM = 3
+    ENTERTAINMENT = 3
 
 
 class User(AbstractUser):
     """
     Класс пользователя
 
-    :param status: если честно хз :class:`django.contrib.auth.models.AbstractUser`
+    :param avatar: Фото пользователя :class:`django.db.models.ImageField`
+    :param theme: Тема сайта
     """
     status = models.CharField(max_length=255)
-    phone_number = models.CharField(null=True, max_length=20)
     avatar = models.ImageField(upload_to='images/', blank=True, null=True)
-    events = models.ManyToManyField("Event")
     theme = models.CharField(max_length=255, default="white")
 
 
@@ -35,13 +34,26 @@ class UserSettings(models.Model):
 
 class Event(models.Model):
     """
-    Класс ивента
+    База мероприятий
+
+    :param name: Название мероприятия :class:`django.db.models.CharField`
+    :param type: Тип мероприятия :class:`django.db.models.IntegerField`
+    :param address: Адрес мероприятия :class:`django.db.models.CharField`
+    :param status: Статус мероприятия :class:`django.db.models.BooleanField`
+    :param start_day: Дата начала мероприятия :class:`django.db.models.DateField`
+    :param finish_day: Дата конца мероприятия :class:`django.db.models.DateField`
+    :param description: Описание мероприятия :class:`django.db.models.CharField`
+    :param author: Создатель мероприятия :class:`django.db.models.ForeignKey`
+    :param members: Участники мероприятия :class:`django.db.models.ManyToManyField`
     """
     name = models.CharField(max_length=255)
 
     class Type(models.IntegerChoices):
         """
-        Закрыт или открыт ивент
+        Тип мероприятия
+
+        :param close: Закрытое мероприятие
+        :param open: Открытое мероприятие
         """
         CLOSE = 0
         OPEN = 1
@@ -52,34 +64,28 @@ class Event(models.Model):
     start_day = models.DateField()
     finish_day = models.DateField()
     description = models.TextField()
-    entertainment_type = models.IntegerField(choices=EntertainmentType.choices)
-    author = models.ForeignKey(get_user_model(), models.CASCADE)
-
-
-class Interests(models.Model):
-    """
-    Интересы у пользователя
-    """
-    interest = models.IntegerField(choices=EntertainmentType.choices)
-    user = models.ForeignKey(get_user_model(), models.CASCADE)
-
-
-class RegistrationEvents(models.Model):
-    """
-    Класс регистрации на ивент
-    """
-    event = models.ForeignKey(Event, models.CASCADE)
-    user = models.ForeignKey(get_user_model(), models.CASCADE)
-
+    author = models.ForeignKey(get_user_model(), models.CASCADE, related_name='author')
+    entertainment_type = models.IntegerField(choices=EntertainmentType.choices, default=1)
+    members = models.ManyToManyField(get_user_model(), related_name='event_members')
 
 class Report(models.Model):
     """
-    Класс репорта
+    База жалоб/вопросов пользователей
+
+    :param author: Автор жалобы :class:`django.db.models.ForeignKey`
+    :param report_text: Текст вопроса жалобы :class:`django.db.models.TextField`
+    :param answer_text: Текст ответа на жалобу :class:`django.db.models.TextField`
+    :param created_at: Дата создания :class:`django.db.models.DateTimeField`
+    :param closed_at: Дата закрытия :class:`django.db.models.DateTimeField`
+    :param type: Тип жалобы :class:`django.db.models.IntegerField`
     """
 
     class Type(models.IntegerChoices):
         """
-        Закрыт репорт или нет
+        Тип жалобы
+
+        :param waiting: Жалоба в обработке
+        :param close: Жалоба проверена
         """
         WAITING = 1
         CLOSE = 2
@@ -94,7 +100,11 @@ class Report(models.Model):
 
 class Friends(models.Model):
     """
-    Запрос на друзья
+    База друзей
+
+    :param from_user: От какого пользователя :class:`django.db.models.ForeignKey`
+    :param to_user: К какому пользователю :class:`django.db.models.ForeignKey`
+    :param waiting: Существует ли запрос, или пользователи уже друзья :class:`django.db.models.BooleanField`
     """
     from_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='who_send')
     to_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='who_receive')
@@ -103,7 +113,13 @@ class Friends(models.Model):
 
 class UserGroups(models.Model):
     """
-    Пользовательские группы
+    База пользовательских групп
+
+    :param title: Название группы :class:`django.db.models.CharField`
+    :param description: Описание группы :class:`django.db.models.CharField`
+    :param founder: Создатель группы :class:`django.db.models.ForeignKey`
+    :param members: Пользователи группы :class:`django.db.models.ManyToManyField`
+
     """
     title = models.CharField(max_length=15)
     description = models.CharField(max_length=255)

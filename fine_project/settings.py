@@ -22,7 +22,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-@9b_x4t*d+ck!d9zgo%fr^-(l$!)6-@bnka(&#ex83%xpc!g6s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False if os.environ.get("debug", True) == "False" else True
+DEBUG = not bool(os.environ.get("debug", True) == "False")
+# DEBUG = False
 
 ALLOWED_HOSTS = [
     "fine.stylelifeweb.su",
@@ -47,16 +48,22 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap5',
     'fine',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'fine_project.urls'

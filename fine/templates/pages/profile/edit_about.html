@@ -4,95 +4,56 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
 {% endblock %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" class="profile-around myform-color">
         {% csrf_token %}
-        <div class="container emp-profile">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="profile-img">
-                            {% if user.avatar %}
-                                <img src="{{user.avatar.url}}">
-                            {% endif %}
-                            {% if not user.avatar %}
-                                <img src="{%static 'images/default_avatar.png' %}">
-                            {% endif %}
-                                <div class="file btn btn-lg btn-primary">
-                                    <input type="checkbox" name="avatar-clear" id="avatar-clear_id">
-                                    Change Avatar
-                                    <input type="file" name="avatar" accept="image/*" id="id_avatar">
-                                </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="profile-head">
-                                    <h5>
-                                        {{request.user.username}}
-                                    </h5>
-                                    <h6>
-                                        {{request.user.first_name}} {{request.user.last_name}}
-                                    </h6>
-                            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                    <div class="col-md-8">
-                        <div class="tab-content profile-tab" id="myTabContent">
-                            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="id_username">Username:</label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <input type="text" class="form-control" name="username" value="{{request.request.user.username}}" maxlength="150" required id="id_username">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="id_first_name">Name:</label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <input type="text" class="form-control" name="first_name" value="{{request.user.first_name}}" maxlength="150" required id="id_first_name">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="id_last_name">Surname:</label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <input type="text" class="form-control" name="last_name" value="{{request.user.last_name}}" maxlength="150" required id="id_last_name">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="id_email">Email:</label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <input type="email" class="form-control" name="email" value="{{request.user.email}}" maxlength="254" required id="id_email">
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label for="id_phone_number">Phone Number:</label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <input type="text" class="form-control" name="phone_number" value="{{request.user.phone_number}}" maxlength="15" required id="id_phone_number">
-                                            </div>
-                                        </div>
-                                <button type="submit" class="btn btn-primary btn-lg">Сохранить изменения</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" class="profile-icon">
+        {% else %}
+            <img src="{% static 'images/default_avatar.png' %}" class="profile-icon">
+        {% endif %}
+        <div class="file profile-edit-btn">
+            <input type="checkbox" name="avatar-clear" id="avatar-clear_id">
+            <span>Change Avatar</span>
+            <input type="file" name="avatar" accept="image/*" id="id_avatar">
         </div>
-</form>
-
-
+        <div class="profile-info-box">
+            <h1 style="font-size: 50px;">
+                <input type="text"
+                       class="form-control"
+                       style="display: inline-block; width: 48%; font-size: 50px;"
+                       name="first_name"
+                       value="{{ request.user.first_name }}"
+                       maxlength="150" required
+                       id="id_first_name"> <input type="text"
+                                                  class="form-control"
+                                                  style="display: inline-block; width: 48%; font-size: 50px;"
+                                                  name="last_name"
+                                                  value="{{ request.user.last_name }}"
+                                                  maxlength="150" required
+                                                  id="id_last_name"></h1>
+            <p class="card-link"
+               style="margin-top: -10px; font-size: 25px;">
+                @<input type="text"
+                        class="form-control"
+                        style="display: inline-block; width: 80%;"
+                        name="username"
+                        value="{{ request.user.username }}" maxlength="150"
+                        required id="id_username">
+            </p>
+            <p style="color: #6c757d;">Зарегистрирован с {{ user.date_joined.date }}</p>
+            <h5>Email: <input type="email"
+                              class="form-control profile-info-email"
+                              style="display:inline-block; width: 80%;"
+                              name="email"
+                              value="{{ request.user.email }}"
+                              maxlength="254" required id="id_email">
+            </h5>
+            <div style="display:block; height: 100%;"></div>
+            <button type="submit" class="btn btn-primary btn-lg profile-edit-btn">Сохранить изменения</button>
+        </div>
+    </form>
 {% endblock %}

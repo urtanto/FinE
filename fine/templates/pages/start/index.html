@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
 {% endblock %}
 
-
 {% block content %}
     <div class="center-message index-gradient" style="width: 100%; min-height: calc(77vh - 3vw);">
         <div>
@@ -64,7 +63,7 @@
                 <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
             </div>
         {% endfor %}
-        <a class="event" style="text-align: center; padding: 0; border: 0;" href="#">
+        <a class="event" style="text-align: center; padding: 0; border: 0;" href="menu/">
             <div class="center-message event-gradient">
                 <h4 style="color: #FFFFFF; width: 50%">Увидеть больше</h4>
             </div>

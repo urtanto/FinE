@@ -8,10 +8,28 @@ from django.template.defaultfilters import register
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
+from django.contrib import messages
 
-from fine.models import RegistrationEvents, User, Interests, Event, Friends, UserGroups, Report
-from fine.forms import EditProfile, InterestsForm, RegistrationForm, CreateEvent, SearchFriends, CreateGroup, \
+from fine.models import User, Event, Friends, UserGroups, Report
+from fine.forms import EditProfile, RegistrationForm, CreateEvent, SearchFriends, CreateGroup, \
     VerifyReportForm, CreateReportForm
+
+
+def defense(func):
+    """
+    Декоратор при ошибке в функции редиректит на страницу ошибки
+    """
+    def wrapped(*args, **kwargs):
+        from fine_project.settings import DEBUG
+        if DEBUG:
+            return func(*args, **kwargs)
+        try:
+            return func(*args, **kwargs)
+        except Exception as err:
+            print(err)
+            return redirect(reverse("error"))
+
+    return wrapped
 
 
 @register.filter
@@ -95,7 +113,9 @@ def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
             {'url_name': reverse('search_friends'), 'name': 'Найти друга'},
         ]
         data["menu"]["right"]["authorized"] = [
-            {'url_name': reverse('groups'), 'name': 'Группы'},
+            {'url_name': reverse('unverifed_reports') if request.user.is_superuser
+            else reverse('my_reports'), 'name': 'Жалобы'},
+            {'url_name': '/groups?action=watch', 'name': 'Группы'},
             {'url_name': reverse('profile', kwargs={'code': request.user.id}), 'name': 'Профиль'},
             {'url_name': reverse('logout'), 'name': 'Выйти', "button-style": "btn-outline-primary"},
         ]
@@ -116,22 +136,50 @@ def theme_change(request: WSGIRequest):
 
 def index_page(request: WSGIRequest):
     """
-    Функция, обрабатывающая запрос.
+    Главная страница сайта
     """
-    context = get_context(request, "FinE", reverse("index"))
+    context = get_context(request, "Wellcome", reverse("index"))
     context["events"] = list(Event.objects.all())[: 3]
     return render(request, 'pages/start/index.html', context)
 
 
+def error_page(request: WSGIRequest):
+    """
+    Страница ошибки
+    """
+    context = get_context(request, "Error")
+    return render(request, 'pages/does_not_found.html', context)
+
+
+@defense
 def menu_page(request: WSGIRequest):
     """
-    Функция, обрабатывающая запрос.
+    Меню с мероприятиями
     """
-    context = get_context(request, "FinE", reverse("menu"))
-    context["events"] = Event.objects.all()
-    return render(request, 'pages/start/index.html', context)
+    context = get_context(request, "Меню", reverse("menu"))
+    context["events"] = Event.objects.filter(type=1, status=True)
+    context['user'] = request.user
+    if request.user.is_authenticated:
+        context["private_events"] = request.user.event_members.filter(type=0, status=True)
+
+    if request.method == 'POST':
+        if request.POST.get('entertainment_type') == '-1':
+            context["events"] = Event.objects.filter(type=1, status=True)
+            if request.user.is_authenticated:
+                context["private_events"] = request.user.event_members.filter(type=0,
+                                                                          status=True)
+        else:
+            context["events"] = Event.objects.filter(type=1, status=True,
+                                                     entertainment_type=request.POST.get('entertainment_type'))
+            if request.user.is_authenticated:
+                context["private_events"] = request.user.event_members.filter(type=0, status=True,
+                                                                          entertainment_type=request.POST.get(
+                                                                              'entertainment_type'))
+
+    return render(request, 'pages/start/menu.html', context)
 
 
+@defense
 def registration_page(request: WSGIRequest):
     """
     Страница регистрации пользователя.
@@ -153,32 +201,25 @@ def registration_page(request: WSGIRequest):
     return render(request, 'registration/register.html', context)
 
 
-INTERESTS = {
-    0: 'Спорт',
-    1: 'Квесты',
-    2: 'Видеоигры',
-    3: 'Фильмы'
-}
-
-
+@defense
 @login_required
 def event_create_page(request: WSGIRequest):
     """
-    Страница с созданием ивента.
+    Страница с созданием мероприятия
     """
-    context = get_context(request, "Create Event")
+    context = get_context(request, "Создание мероприятия")
+    context['today'] = str(datetime.today().date())
     if request.method == 'POST':
         form = CreateEvent(request.POST)
         if form.is_valid():
-            event = Event(name=form.cleaned_data['name'],
-                          type=form.cleaned_data['type'],
-                          address=form.cleaned_data['address'],
-                          start_day=form.cleaned_data['start_day'],
-                          finish_day=form.cleaned_data['finish_day'], description=form.cleaned_data['description'],
-                          entertainment_type=form.cleaned_data['entertainment_type'],
-                          author=request.user)
-            event.save()
-            return redirect('/')
+            if form.cleaned_data['start_day'] <= form.cleaned_data['finish_day']:
+                event = Event(name=form.cleaned_data['name'], type=form.cleaned_data['type'],
+                              address=form.cleaned_data['address'], start_day=form.cleaned_data['start_day'],
+                              finish_day=form.cleaned_data['finish_day'], description=form.cleaned_data['description'],
+                              author=request.user, entertainment_type=form.cleaned_data['entertainment_type'])
+                event.save()
+                return redirect(reverse('event_commit', kwargs={"event_id": event.id}))
+            messages.add_message(request, messages.ERROR, "Дата окончания не может быть раньше даты начала.")
         context['errors'] = form.errors
     else:
         form = CreateEvent()
@@ -186,15 +227,16 @@ def event_create_page(request: WSGIRequest):
     return render(request, 'pages/event/create.html', context)
 
 
+@defense
 @login_required
 def event_edit_page(request: WSGIRequest, event_id: int):
     """
-    Cтраница изменения ивента.
+    Cтраница изменения мероприятия
 
     :param event_id: Event ID
     :type event_id: int
     """
-    context = get_context(request, "Edit Event")
+    context = get_context(request, "Редактирование мероприятия")
     context["event_id"] = event_id
     event = Event.objects.get(pk=event_id)
     form = CreateEvent(instance=event)
@@ -206,10 +248,11 @@ def event_edit_page(request: WSGIRequest, event_id: int):
     return render(request, 'pages/event/edit.html', context)
 
 
+@defense
 @login_required
 def commit_event_page(request, event_id):
     """
-    Страница с добавлением пользователя на мероприятие.
+    Страница с добавлением пользователя на мероприятие
 
     :param event_id: Event ID
     :type event_id: int
@@ -217,9 +260,36 @@ def commit_event_page(request, event_id):
     try:
         event = Event.objects.get(pk=event_id)
     except Event.DoesNotExist:
+        return redirect(reverse('event', kwargs={"event_id": event_id}))
+
+    request.user.event_members.add(event)
+
+    return redirect(reverse('event', kwargs={"event_id": event_id}))
+
+
+@defense
+@login_required
+def commit_event_group_page(request, event_id, group_id):
+    """
+    Страница с добавлением группы пользователей на мероприятие
+
+    :param event_id: Event ID
+    :type event_id: int
+    :param group_id: Group ID
+    :type group_id: int
+    """
+    event = Event.objects.get(pk=event_id)
+    group = UserGroups.objects.get(id=group_id)
+    members = group.members.all()
+
+    if request.user != event.author or request.user != group.founder:
         return redirect('/')
-    request.user.events.add(event)
-    return redirect('/')
+
+    for user in members:
+        user.event_members.add(event)
+        user.save()
+
+    return redirect(reverse('event', kwargs={"event_id": event_id}))
 
 
 def friends_for_profile_view_page_algo(request: WSGIRequest, code: int):
@@ -243,6 +313,7 @@ def friends_for_profile_view_page_algo(request: WSGIRequest, code: int):
         Friends.objects.filter(id=Friends.objects.get(to_user=request.user, from_user=code).id).update(waiting=False)
 
 
+@defense
 def profile_view_page(request: WSGIRequest, code: int):
     """
     Страница профиля пользователя.
@@ -250,17 +321,14 @@ def profile_view_page(request: WSGIRequest, code: int):
     :param code: ID пользователя
     :type code: int
     """
-    context = get_context(request, "Profile", reverse("profile", kwargs={'code': code}))
+    context = get_context(request, "Профиль", reverse("profile", kwargs={'code': code}))
     try:
-        context['user'] = User.objects.get(id=code)  # все поля из модели для пользователя с id = code
-        context['events'] = RegistrationEvents.objects.filter(user=code)  # ивенты, на которые зарегался пользователь
-        # context['interests'] = []  # интересы пользователя
-        # Interests.objects.filter(user=code).values_list('interest', flat=True)
-        # for i in Interests.objects.filter(user=code).values_list('interest', flat=True):
-        #    context['interests'].append(INTERESTS[i])
+        context['user'] = User.objects.get(id=code)
+        context['events'] = list(context['user'].event_members.all())
+        context['my_events'] = list(Event.objects.filter(author=context['user']))
     except User.DoesNotExist as user_does_not_exist:
         context['events'] = None
-        context['interests'] = None
+        context['my_events'] = None
         raise Http404 from user_does_not_exist
     if request.user.is_authenticated:
         try:
@@ -275,18 +343,18 @@ def profile_view_page(request: WSGIRequest, code: int):
             context['have_request'] = False
     if request.method == 'POST':
         friends_for_profile_view_page_algo(request, code)
-
         return redirect('/profile/' + str(code))
 
     return render(request, 'pages/profile/view.html', context)
 
 
+@defense
 @login_required
 def edit_page(request: WSGIRequest):
     """
     Страница редактирования основной информации профиля.
     """
-    context = get_context(request, "Profile Editing", reverse("profile", kwargs={'code': request.user.id}))
+    context = get_context(request, "Редактирование профиля", reverse("profile", kwargs={'code': request.user.id}))
 
     cur_user = User.objects.get(username=request.user.username)
     form = EditProfile(instance=cur_user)
@@ -299,51 +367,6 @@ def edit_page(request: WSGIRequest):
     context['form'] = form
 
     return render(request, 'pages/profile/edit_about.html', context)
-
-
-def to_fit(arr, size, request):
-    """
-    Функция для возвращения размера массива 'Интересов' к параметру :size.
-
-    :param arr: Массив интересов.
-    :param size: Размер будущего массива.
-    :param request: Параметр запроса для POST-обработки.
-    """
-    if len(arr) > size:
-        for i in range(len(arr) - size):
-            arr[i].delete()
-    elif len(arr) < size:
-        for i in range(size - len(arr)):
-            arr.create(user=request.user, interest=0)
-
-
-@login_required
-def edit_interests_page(request: WSGIRequest):
-    """
-    Страница с редактированием интересов пользователя.
-    """
-    context = get_context(request, "Profile Editing", reverse("profile", kwargs={'code': request.user.id}))
-    if request.method == 'POST':
-        form = InterestsForm(request.POST)
-        if form.is_valid():
-            interests = form.cleaned_data.get('Interests')
-            context['interests'] = interests
-
-            cur_interests = User.objects.get(id=request.user.id).interests_set.all()
-            to_fit(cur_interests, len(interests), request)
-
-            counter = 0
-            for i in cur_interests.values_list('id', flat=True):
-                Interests.objects.filter(id=i).update(interest=int(interests[counter]))
-                counter += 1
-            context['cur_interests'] = cur_interests
-
-            return redirect('/profile/' + str(request.user.id))
-    else:
-        form = InterestsForm
-    context['form'] = form
-
-    return render(request, 'pages/profile/edit_interests.html', context)
 
 
 def friends_algo(request: WSGIRequest):
@@ -368,7 +391,7 @@ def friends_algo(request: WSGIRequest):
         Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
 
 
-def get_user(received_object: RegistrationEvents | Friends) -> User:
+def get_user(received_object: Friends) -> User:
     """
     получает юзера из RegistrationEvents/Friends
     :param received_object: объект RegistrationEvents/Friends
@@ -379,6 +402,7 @@ def get_user(received_object: RegistrationEvents | Friends) -> User:
     return received_object.user
 
 
+@defense
 @login_required
 def event_page(request: WSGIRequest, event_id: int):
     """
@@ -387,23 +411,34 @@ def event_page(request: WSGIRequest, event_id: int):
     :param event_id:
     :return:
     """
-    context = get_context(request, "Profile Editing")
+    context = get_context(request, "Мероприятие")
     try:
-        event: Event = list(Event.objects.filter(id=int(event_id)))[0]
+        event: Event = Event.objects.get(id=event_id)
+        people: list[User] = User.objects.filter(event_members__id=event_id).all()
+
+        if event.type == 0 and request.user not in people:
+            return render(request, 'pages/does_not_found.html', context)
+
         if request.method == 'POST':
             data = json.loads(request.body)
             if data["going"]:
-                RegistrationEvents.objects.get(event=event, user=request.user).delete()
+                request.user.event_members.remove(event_id)
             else:
-                RegistrationEvents.objects.create(event=event, user=request.user)
-        friends: list[Friends] = list(Friends.objects.filter(to_user=request.user, waiting=False))
-        people: list[RegistrationEvents] = list(RegistrationEvents.objects.filter(event=event_id))
+                return redirect(reverse('event_commit', kwargs={"event_id": event_id}))
+
+        friends: list[Friends] = Friends.objects.filter(to_user=request.user, waiting=False).all()
         friends: list[User] = list(map(get_user, friends))
-        people: list[User] = list(map(get_user, people))
+        friends_set = set(friends)
+        people_set = set(people)
+
+        friends = list(friends_set.intersection(people_set))
+
         context['event'] = event
+        context['user'] = request.user
         context['friends'] = friends
         context['people'] = people
         context['going'] = request.user in people
+        context['address'] = event.address
     except IndexError:
         return render(request, 'pages/does_not_found.html', context)
     return render(request, 'pages/main/event.html', context)
@@ -418,29 +453,14 @@ def get_friends(user_id: int):
     return Friends.objects.filter(from_user=User.objects.get(id=user_id).id, waiting=False)
 
 
-def friends_only_page(request):
-    """
-    Страница только с друзьями пользователя
-    """
-    context = get_context(request, "Friends", reverse("friends"))
-    context['friends'] = Friends.objects.filter(to_user=request.user, waiting=False)
-    context['friends_size'] = len(context['friends'])
-    if request.method == 'POST':
-        if request.POST.get('del_friend'):
-            friend = Friends.objects.get(id=request.POST.get('del_friend'))
-            Friends.objects.get(to_user=friend.to_user, from_user=friend.from_user).delete()
-            Friends.objects.get(to_user=friend.from_user, from_user=friend.to_user).delete()
-        return redirect('/friends_only/')
-    return render(request, 'pages/friends/friends_only_page.html', context)
-
-
+@defense
 @login_required
 def friends_page(request: WSGIRequest):
     """
     Страница с друзьями пользователя
     """
 
-    context = get_context(request, "Friends", reverse("friends"))
+    context = get_context(request, "Друзья", reverse("friends"))
     context["friends"] = list(Friends.objects.filter(to_user=request.user, waiting=False))
     context["friends_request_to_user"] = list(Friends.objects.filter(to_user=request.user, waiting=True))
     context["friends_request_by_user"] = list(Friends.objects.filter(from_user=request.user, waiting=True))
@@ -456,12 +476,13 @@ def friends_page(request: WSGIRequest):
     return render(request, 'pages/friends/friends.html', context)
 
 
+@defense
 @login_required
 def create_group_page(request):
     """
     Страница с созданием пользовательской группы
     """
-    context = get_context(request, "Create Group", reverse('groups'))
+    context = get_context(request, "Создание группы", reverse('groups'))
 
     if request.method == 'POST':
         form = CreateGroup(request.POST)
@@ -478,26 +499,39 @@ def create_group_page(request):
     return render(request, 'pages/groups/create_group.html', context)
 
 
+@defense
 @login_required
 def groups_page(request):
     """
-    Страница со всеми пользовательскими группами пользователей
+    Страница со всеми пользовательскими группами
     """
-    context = get_context(request, "Groups", reverse('groups'))
-    context['groups'] = request.user.members.all()
-    context['groups_size'] = len(context['groups'])
+    context = get_context(request, "Группы", reverse('groups'))
+    if request.method == 'GET':
+        if len(request.GET) == 0:
+            return render(request, 'pages/does_not_found.html', context)
+        if request.GET['action'] == 'watch':
+            context['buttons'] = 'Информация'
+            context['action'] = request.GET['action']
+            context['groups'] = request.user.members.all()
+        elif request.GET['action'] == 'invite':
+            context['buttons'] = 'Добавить'
+            context['action'] = request.GET['action']
+            context['event_id'] = request.GET['event_id']
+        else:
+            return render(request, 'pages/does_not_found.html', context)
+
     context['my_groups'] = UserGroups.objects.filter(founder=request.user)
-    context['my_groups_size'] = len(context['my_groups'])
 
     return render(request, 'pages/groups/user_groups.html', context)
 
 
+@defense
 @login_required
 def group_page(request, group_id: int):
     """
     Страница с пользовательской группой
     """
-    context = get_context(request, 'Group №' + str(group_id), reverse('groups'))
+    context = get_context(request, 'Группа №' + str(group_id), reverse('groups'))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['users'] = User.objects.filter(members__id=group_id)
     context['user'] = request.user
@@ -595,12 +629,13 @@ class GetFriendsGroup:
         return self.request.user.id
 
 
+@defense
 @login_required
 def search_friends(request):
     """
-    Страница по поиску людей
+    Страница для поиска друзей
     """
-    context = get_context(request, "Search friends", reverse("search_friends"))
+    context = get_context(request, "Поиск друзей", reverse("search_friends"))
     get_friends_group = GetFriendsGroup(request)
     find = Search(request)
     users_friends = User.objects.exclude(id__in=get_friends_group.get_friends_request_id())
@@ -621,17 +656,18 @@ def search_friends(request):
     return render(request, 'pages/friends/search_friends.html', context)
 
 
+@defense
 @login_required
 def add_to_group_page(request, group_id: int):
     """
-    Страница по добавлению пользователей в группу
+    Страница с добавлением пользователей в группу
     """
-    context = get_context(request, 'Adding to Group №' + str(group_id), reverse('groups'))
+    context = get_context(request, 'Добавление в группу №' + str(group_id), reverse('groups'))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
 
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
-        return redirect('/groups/group/' + str(group_id))
+        return render(request, 'pages/does_not_found.html', context)
 
     get_friends_group = GetFriendsGroup(request)
 
@@ -661,17 +697,18 @@ def add_to_group_page(request, group_id: int):
     return render(request, 'pages/groups/add_to_group.html', context)
 
 
+@defense
 @login_required
 def remove_from_the_group_page(request, group_id: int):
     """
-    Страница по удалению пользователей из группы
+    Страница с удалением пользователей из группы
     """
-    context = get_context(request, 'Remove from the group №' + str(group_id), reverse('groups'))
+    context = get_context(request, 'Удаление из группы №' + str(group_id), reverse('groups'))
     context['group'] = UserGroups.objects.get(id=group_id)
     context['group_id'] = group_id
 
     if UserGroups.objects.get(id=group_id).founder.id is not request.user.id:
-        return redirect('/groups/group/' + str(group_id))
+        return render(request, 'pages/does_not_found.html', context)
 
     get_friends_group = GetFriendsGroup(request)
 
@@ -698,6 +735,7 @@ def remove_from_the_group_page(request, group_id: int):
     return render(request, 'pages/groups/remove_from_the_group.html', context)
 
 
+@defense
 @login_required
 def report_page(request, report_id: int):
     """
@@ -707,7 +745,7 @@ def report_page(request, report_id: int):
 
     try:
         if Report.objects.get(id=report_id).author != request.user:
-            return redirect('my_profile/my_reports/')
+            return render(request, 'pages/does_not_found.html', context)
         context['report'] = Report.objects.get(id=report_id)
         context['report_type'] = context['report'].type
         context['id'] = report_id
@@ -717,6 +755,7 @@ def report_page(request, report_id: int):
     return render(request, 'pages/reports/report.html', context)
 
 
+@defense
 @login_required
 def create_report_page(request):
     """
@@ -730,12 +769,12 @@ def create_report_page(request):
             rep = Report.objects.create(author=request.user,
                                         report_text=context['form'].cleaned_data['report_text'],
                                         type=1, created_at=datetime.now())
-            rep.save()
             return redirect(reverse('report', kwargs={"report_id": rep.id}))
 
     return render(request, 'pages/reports/create_report.html', context)
 
 
+@defense
 @login_required
 def my_reports_page(request):
     """
@@ -753,14 +792,16 @@ def my_reports_page(request):
     return render(request, 'pages/reports/my_reports.html', context)
 
 
+@defense
 @login_required
 def unverifed_reports_page(request):
     """
     Страница с репортами, на которые не дали ответы
     """
-    if not request.user.is_superuser:
-        return redirect('/')
     context = get_context(request, 'Проверка жалоб')
+
+    if not request.user.is_superuser:
+        return render(request, 'pages/does_not_found.html', context)
 
     try:
         context['reports'] = Report.objects.filter(type=1)
@@ -771,24 +812,29 @@ def unverifed_reports_page(request):
     return render(request, 'pages/reports/unverifed_reports.html', context)
 
 
+@defense
 @login_required
 def verify_report_page(request, report_id):
     """
     Страница с ответом на репорт
     """
     context = get_context(request, "Жалоба №" + str(report_id))
+
+    if not request.user.is_superuser:
+        return render(request, 'pages/does_not_found.html', context)
+
     context['form'] = VerifyReportForm(request.POST) if request.method == 'POST' else VerifyReportForm()
 
     context['report'] = Report.objects.get(id=report_id)
     context['id'] = report_id
 
     if context['report'].type == 2:
-        return redirect('/verify_reports/')
+        return redirect('/reports/unverifed_reports')
 
     if request.method == 'POST':
         if context['form'].is_valid():
             Report.objects.filter(id=report_id).update(closed_at=datetime.now(),
                                                        answer_text=context['form'].cleaned_data['answer_text'], type=2)
-            return redirect('/verify_reports/')
+            return redirect('/reports/unverifed_reports')
 
     return render(request, 'pages/reports/verify_report.html', context)
