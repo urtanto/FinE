@@ -324,8 +324,8 @@ def profile_view_page(request: WSGIRequest, code: int):
     context = get_context(request, "Профиль", reverse("profile", kwargs={'code': code}))
     try:
         context['user'] = User.objects.get(id=code)
-        context['events'] = list(context['user'].event_members.all())
-        context['my_events'] = list(Event.objects.filter(author=context['user']))
+        context['events'] = list(context['user'].event_members.filter(type=1))
+        context['my_events'] = list(Event.objects.filter(author=context['user'], type=1))
     except User.DoesNotExist as user_does_not_exist:
         context['events'] = None
         context['my_events'] = None
@@ -542,7 +542,7 @@ def group_page(request, group_id: int):
 
     if request.POST.get('del') == 'del':
         context['group'].delete()
-        return redirect('/groups/?action=watch')
+        return redirect('/groups/')
     if request.POST.get('del') == 'user':
         context['user'].members.remove(context['group'])
         return redirect('/groups/')
