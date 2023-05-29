@@ -68,6 +68,7 @@ class Event(models.Model):
     entertainment_type = models.IntegerField(choices=EntertainmentType.choices, default=1)
     members = models.ManyToManyField(get_user_model(), related_name='event_members')
 
+
 class Report(models.Model):
     """
     База жалоб/вопросов пользователей
@@ -116,12 +117,12 @@ class UserGroups(models.Model):
     База пользовательских групп
 
     :param title: Название группы :class:`django.db.models.CharField`
-    :param description: Описание группы :class:`django.db.models.CharField`
+    :param description: Описание группы :class:`django.db.models.TextField`
     :param founder: Создатель группы :class:`django.db.models.ForeignKey`
     :param members: Пользователи группы :class:`django.db.models.ManyToManyField`
 
     """
-    title = models.CharField(max_length=15)
-    description = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
     founder = models.ForeignKey(get_user_model(), models.CASCADE, related_name='founder')
     members = models.ManyToManyField(get_user_model(), related_name='members')

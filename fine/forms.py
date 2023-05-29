@@ -1,7 +1,7 @@
 from django import forms
 
 from django.contrib.auth.forms import UserCreationForm
-from django.forms import ModelForm
+from django.forms import ModelForm, Textarea
 from fine.models import User, Event
 
 
@@ -67,6 +67,7 @@ class SearchFriends(forms.Form):
     """
     search = forms.CharField(max_length=255, label='Введите имя пользователя')
 
+
 class CreateGroup(forms.Form):
     """
     Форма создания пользовательской группы
@@ -74,17 +75,19 @@ class CreateGroup(forms.Form):
     :param title: Название группы :class:`django.forms.CharField`
     :param description: Описание группы :class:`django.forms.CharField`
     """
-    title = forms.CharField(max_length=15, label='Название группы', help_text='')
-    description = forms.CharField(max_length=255, label='Описание группы', help_text='')
+    title = forms.CharField(max_length=255, label='Название группы', help_text='')
+    description = forms.CharField(label='Описание группы', help_text='', widget=Textarea())
+
 
 class CreateReportForm(forms.Form):
     """
     Форма для создания репорта
     """
-    report_text = forms.CharField(max_length=1024)
+    report_text = forms.CharField(max_length=1024, widget=Textarea())
+
 
 class VerifyReportForm(forms.Form):
     """
     Формя для ответа на репорт
     """
-    answer_text = forms.CharField(max_length=1024, label="Напишите ответ на жалобу пользователя")
+    answer_text = forms.CharField(max_length=1024, label="Напишите ответ на жалобу пользователя", widget=Textarea())

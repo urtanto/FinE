@@ -11,12 +11,12 @@
 {% block content %}
     <form method="post">
         {% csrf_token %}
-        <p><select name="entertainment_type" class="form-control form-control-sm">
-            <option value="-1" style="color: #000000;">Все мероприятия</option>
-            <option value="0" style="color: #000000;">Спортивное мероприятие</option>
-            <option value="1" style="color: #000000;">Встреча / Сходка</option>
-            <option value="2" style="color: #000000;">Видеоигры</option>
-            <option value="3" style="color: #000000;">Развлечния (Фильм / Театр и т.п.)</option>
+        <p><select style="color: #000000;" name="entertainment_type" class="form-control form-control-sm">
+            <option style="color: #000000;" value="-1">Все мероприятия</option>
+            <option style="color: #000000;" value="0">Спортивное мероприятие</option>
+            <option style="color: #000000;" value="1">Встреча / Сходка</option>
+            <option style="color: #000000;" value="2">Видеоигры</option>
+            <option style="color: #000000;" value="3">Развлечния (Фильм / Театр и т.п.)</option>
         </select></p>
         <input class="btn btn-warning" type="submit" value="Фильтровать">
     </form>
